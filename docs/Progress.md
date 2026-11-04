@@ -15,7 +15,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [ ] Telegram bot via @BotFather
 - [ ] LLM API key; Neon Postgres database
 - [ ] Join the Walrus and Tatum Discords. **Ask whether the Agent Payments prize exists** (the rules list a Mystery Bounty instead)
-- [~] GitHub repo `kyvo` (public, MIT): committed locally, not created on GitHub yet
+- [x] GitHub repo `kyvo` (public, MIT): https://github.com/Sam-Rytech/kyvo
 - [x] Node upgraded to 22.23.4; `.env.example` and `.env.local` created; `TOKEN_ENC_KEY`, `NS_SALT`, `CRON_SECRET` generated. **Back up `NS_SALT` in a password manager**
 
 **Gate 0:** every key is in `.env.local` and `node -v` is ≥ 22.23.4.
@@ -109,4 +109,5 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Date | What happened | Blockers |
 |---|---|---|
 | Nov 4 | Idea locked: Kyvo (global, inbox auto-scan). Architecture and plan written. | — |
-| Nov 4 | Full build plan approved (`docs/PLAN.md`). Local repo set up, five open decisions recorded in the docs. Gate 0 not passed yet: external accounts and keys are still to do. | Accounts and keys; GitHub repo creation needs the owner to run or allow it |
+| Nov 4 | Full build plan approved (`docs/PLAN.md`). Local repo set up, five open decisions recorded in the docs. Gate 0 not passed yet: external accounts and keys are still to do. | Accounts and keys |
+| Nov 5 | GitHub repo created and pushed. First Neon sign-in timed out at its 60-second limit; database not created yet. Gate 0 still open. | Accounts and keys; Neon sign-in |
