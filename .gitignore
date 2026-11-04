@@ -1,0 +1,21 @@
+# Secrets: every env file stays local except the blank template
+.env*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Next.js and Vercel
+.next/
+out/
+.vercel/
+next-env.d.ts
+*.tsbuildinfo
+
+# Tests
+coverage/
+
+# OS and logs
+.DS_Store
+Thumbs.db
+*.log
