@@ -62,7 +62,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [x] Wallet connect (`dapp-kit-react`, or paste an address); vault balance and months-of-runway card
 - [x] Family plan: create a plan, add members' Sui addresses, Tatum GraphQL payment matcher, lateness memory. Matcher proven on a real mainnet USDC transfer, read-only
 - [~] **Real test:** 2 friends (or 2 of your own wallets) send ≥ 0.01 USDC each → auto-marked paid. Waiting on the owner's wallet funds
-- [~] Telegram bot: `/start` linking, daily digest, decline-guard alerts, trial alerts. Built and webhook set; waiting on the owner linking Telegram
+- [x] Telegram bot: `/start` linking, daily digest, decline-guard alerts, trial alerts. Linked; the live cron sent a digest, and a second run sent no duplicate
 - [x] Vercel Cron: daily scan → engines → notify. Hobby: once a day (±59 min), 300s, no retries, can repeat. Live run: 66s, no errors
 - [x] `/status` page (timings for Tatum, Walrus and Gmail) and `/proof` page (memory count, blob links, Sui transaction links)
 
@@ -121,3 +121,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Owner reviewed and approved the 15 redacted email fixtures: committed, 15/15 on the real model. **Day 2 complete.** | Vault wallet empty; Discord question open |
 | Nov 5 | Day 3: forecast, hindcast scoring, decline guard, trials, card registry, hikes and promises built test-first; 159 tests pass, 15/15 on the extractor. Provider fees re-verified, which corrected several numbers. Real runs exposed the relayer's 20-ID status limit and engine results depending on row order: both fixed. **Gate 3 passed.** Not done: provider funding markup (no real top-up to compare yet, so local amounts use the market rate and show "≈"); the demo account has no forecasts yet (Day 5). | Vault wallet empty; Discord question open; a real naira amount needed to set the funding markup |
 | Nov 5 | Day 4 built: vault, family payments, Telegram, daily cron, /status, /proof. 207 tests pass. Found the Tatum gateway now refuses address queries with no starting checkpoint, and `@mysten/dapp-kit` is deprecated: both handled and documented. **Gate 4 not passed yet.** | Owner: link Telegram; fund the wallet for the real payment |
+| Nov 5 | Telegram linked after fixing links whose signature contained an underscore. Live cron delivered a digest; a repeat run skipped it. Only the real USDC payment remains for Gate 4. | Owner's wallet funds |
