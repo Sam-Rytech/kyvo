@@ -99,6 +99,14 @@ describe('deriveSubscriptions', () => {
     expect(sub.records).toHaveLength(3);
   });
 
+  it('counts a receipt and an invoice for the same money once, and keeps both records', () => {
+    const [sub] = deriveSubscriptions([e('charge', '2026-08-24', 4.51, 'b1'), e('usage_bill', '2026-08-24', 4.51, 'b2')]);
+    expect(sub.chargeCount).toBe(1);
+    expect(sub.usageBilled).toBe(true);
+    expect(sub.priceChange).toBeNull();
+    expect(sub.records).toHaveLength(2);
+  });
+
   it('does not treat a decline as a charge', () => {
     const [sub] = deriveSubscriptions([e('decline', '2026-09-18', 20, 'b1')]);
     expect(sub).toMatchObject({ chargeCount: 0, lastAmount: null, declineCount: 1 });

@@ -55,7 +55,8 @@ export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string
   const views = kept.map(([slug, list]): SubscriptionView => {
     // Oldest first. A blob ID breaks ties, so a rebuild gives the same order.
     const sorted = [...list].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || a.blobId.localeCompare(b.blobId));
-    const paid = sorted.filter((e) => PAID_TYPES.has(e.type) && num(e.event.amt) !== null);
+    // A receipt and an invoice can describe the same money, so one day and amount counts once.
+    const paid = [...new Map(sorted.filter((e) => PAID_TYPES.has(e.type) && num(e.event.amt) !== null).map((e) => [`${e.eventDate}|${num(e.event.amt)}`, e])).values()];
     const last = paid.at(-1);
     const previous = paid.at(-2);
     const lastAmount = last ? num(last.event.amt) : null;
