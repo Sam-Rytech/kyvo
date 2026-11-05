@@ -126,6 +126,17 @@ describe('toEvent', () => {
     expect(toEvent(raw(over as never), '2026-10-18')?.kind).toBe(over.kind);
   });
 
+  it('drops bills in the home currency, even when the model is confident', () => {
+    expect(toEvent(raw({ merchant: 'MSport', amount: 1000, currency: 'NGN' }), '2026-10-17', 'NGN')).toBeNull();
+    expect(toEvent(raw({ kind: 'decline', currency: 'ngn' }), '2026-10-17', 'NGN')).toBeNull();
+    expect(toEvent(raw({ currency: 'USD' }), '2026-10-17', 'NGN')).not.toBeNull();
+    expect(toEvent(raw({ currency: 'EUR' }), '2026-10-17', 'NGN')).not.toBeNull();
+  });
+
+  it('keeps every bill for a user whose home currency is USD', () => {
+    expect(toEvent(raw({ currency: 'USD' }), '2026-10-17', 'USD')).not.toBeNull();
+  });
+
   it('removes legal suffixes from merchants', () => {
     expect(normalizeMerchant('Anthropic, PBC')).toBe('Anthropic');
     expect(normalizeMerchant('Vercel Inc.')).toBe('Vercel');

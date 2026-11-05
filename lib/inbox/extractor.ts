@@ -52,9 +52,16 @@ export function normalizeMerchant(merchant: string): string {
   return merchant.replace(LEGAL_SUFFIX, '').replace(/[,.\s]+$/, '').trim();
 }
 
-/** Turns the model's output into a typed event, or null. A wrong fact is worse than a missing one. */
-export function toEvent(raw: z.infer<typeof RawExtraction>, emailDate: string): ExtractedEvent | null {
+const BILL_KINDS = new Set(['charge', 'usage_bill', 'decline', 'refund']);
+
+/**
+ * Turns the model's output into a typed event, or null. A wrong fact is worse than a missing
+ * one, and memories can't be deleted. Kyvo tracks bills in foreign currency, so a bill in the
+ * user's own currency is never a dollar subscription, however confident the model is.
+ */
+export function toEvent(raw: z.infer<typeof RawExtraction>, emailDate: string, homeCurrency?: string): ExtractedEvent | null {
   if (raw.kind === 'none' || raw.confidence < MIN_CONFIDENCE) return null;
+  if (homeCurrency && homeCurrency !== 'USD' && BILL_KINDS.has(raw.kind) && raw.currency?.toUpperCase() === homeCurrency) return null;
   const merchant = raw.merchant ? normalizeMerchant(raw.merchant) : raw.merchant;
   const parsed = ExtractedEvent.safeParse({
     kind: raw.kind,
@@ -89,7 +96,8 @@ Choose kind:
 - card_topup: the user funded a virtual dollar card or card provider.
 - none: anything else.
 
-Use none for: reminders and "upcoming invoice" notices (no money moved yet), marketing, offers, job or bounty messages, income the user received, bank transfers between people, food delivery and other one-off shopping, utilities, school fees, and crypto exchange activity.
+Use none for: reminders and "upcoming invoice" notices (no money moved yet), marketing, offers, job or bounty messages, income the user received, bank or mobile-wallet alerts (OPay, PalmPay, Paystack, bank debit notifications), betting and gambling, transfers between people, food delivery and other one-off shopping, utilities, school fees, and crypto exchange activity.
+A notice that access was paused or suspended is decline only if it states a failed payment.
 
 Rules:
 - merchant: the brand name only, with no legal suffix, and spelled the same way every time. "Anthropic, PBC" becomes "Anthropic". For a Google Play purchase, use the app's name.
@@ -115,7 +123,7 @@ export class LlmQuotaError extends Error {
 
 export type Extractor = (email: GmailMessage) => Promise<ExtractedEvent | null>;
 
-export function createExtractor(apiKey: string = process.env.LLM_API_KEY ?? ''): Extractor {
+export function createExtractor(homeCurrency?: string, apiKey: string = process.env.LLM_API_KEY ?? ''): Extractor {
   if (!apiKey) throw new Error('LLM_API_KEY is not set');
   const groq = createGroq({ apiKey });
 
@@ -131,7 +139,7 @@ export function createExtractor(apiKey: string = process.env.LLM_API_KEY ?? ''):
         maxRetries: 0,
         abortSignal: AbortSignal.timeout(30_000),
       });
-      return toEvent(output, email.date);
+      return toEvent(output, email.date, homeCurrency);
     } catch (error) {
       if (NoObjectGeneratedError.isInstance(error)) return null;
       const e = error as { statusCode?: number; responseHeaders?: Record<string, string> };

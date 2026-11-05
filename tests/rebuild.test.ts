@@ -84,6 +84,21 @@ describe('deriveSubscriptions', () => {
     expect(deriveSubscriptions([...events].reverse())).toEqual(deriveSubscriptions(events));
   });
 
+  it('hides merchants billed only in the home currency', () => {
+    const naira = { ...e('charge', '2026-10-17', 1000, 'n1'), merchant: 'msport' };
+    naira.event = { amt: 1000, cur: 'NGN', name: 'MSport' };
+    const list = deriveSubscriptions([naira, ...events], 'NGN');
+    expect(list.map((s) => s.slug)).toEqual(['anthropic']);
+    expect(deriveSubscriptions([naira], 'USD')).toHaveLength(1);
+  });
+
+  it('counts two emails about one failed attempt as one decline, and keeps both records', () => {
+    const noAmount = { ...e('decline', '2026-09-18', undefined, 'b5'), event: { name: 'Anthropic' } };
+    const [sub] = deriveSubscriptions([e('decline', '2026-09-18', 20, 'b6'), noAmount, e('decline', '2026-08-18', 20, 'b7')]);
+    expect(sub.declineCount).toBe(2);
+    expect(sub.records).toHaveLength(3);
+  });
+
   it('does not treat a decline as a charge', () => {
     const [sub] = deriveSubscriptions([e('decline', '2026-09-18', 20, 'b1')]);
     expect(sub).toMatchObject({ chargeCount: 0, lastAmount: null, declineCount: 1 });

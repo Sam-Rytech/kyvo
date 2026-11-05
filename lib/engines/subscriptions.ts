@@ -34,14 +34,25 @@ const titleCase = (slug: string) => slug.split('-').map((word) => word.charAt(0)
 const num = (value: unknown) => (typeof value === 'number' ? value : null);
 const str = (value: unknown) => (typeof value === 'string' ? value : null);
 
-export function deriveSubscriptions(events: CachedEvent[]): SubscriptionView[] {
+/** Memories can't be deleted, so a merchant billed only in the user's own currency is hidden here. */
+function isForeignBilled(list: CachedEvent[], homeCurrency: string | undefined): boolean {
+  if (!homeCurrency || homeCurrency === 'USD') return true;
+  return list.some((e) => {
+    const currency = str(e.event.cur);
+    return currency !== null && currency !== homeCurrency;
+  });
+}
+
+export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string): SubscriptionView[] {
   const groups = new Map<string, CachedEvent[]>();
   for (const event of events) {
     if (!event.merchant || !SUBSCRIPTION_TYPES.has(event.type)) continue;
     groups.set(event.merchant, [...(groups.get(event.merchant) ?? []), event]);
   }
 
-  const views = [...groups.entries()].map(([slug, list]): SubscriptionView => {
+  const kept = [...groups.entries()].filter(([, list]) => isForeignBilled(list, homeCurrency));
+
+  const views = kept.map(([slug, list]): SubscriptionView => {
     // Oldest first. A blob ID breaks ties, so a rebuild gives the same order.
     const sorted = [...list].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || a.blobId.localeCompare(b.blobId));
     const paid = sorted.filter((e) => PAID_TYPES.has(e.type) && num(e.event.amt) !== null);
@@ -58,7 +69,8 @@ export function deriveSubscriptions(events: CachedEvent[]): SubscriptionView[] {
       lastDate: last?.eventDate ?? null,
       card: str([...sorted].reverse().find((e) => str(e.event.card))?.event.card),
       chargeCount: paid.length,
-      declineCount: sorted.filter((e) => e.type === 'decline').length,
+      // Several emails can describe one failed attempt, so a day counts once.
+      declineCount: new Set(sorted.filter((e) => e.type === 'decline').map((e) => e.eventDate)).size,
       refundCount: sorted.filter((e) => e.type === 'refund').length,
       usageBilled: sorted.some((e) => e.type === 'usage_bill'),
       priceChange: lastAmount !== null && previousAmount !== null && lastAmount !== previousAmount ? { from: previousAmount, to: lastAmount } : null,

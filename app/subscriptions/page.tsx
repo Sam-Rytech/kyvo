@@ -83,7 +83,7 @@ export default async function SubscriptionsPage() {
     db.select().from(cacheEvents).where(eq(cacheEvents.userId, session.userId)),
     db.select().from(users).where(eq(users.id, session.userId)),
   ]);
-  const subscriptions = deriveSubscriptions(events);
+  const subscriptions = deriveSubscriptions(events, user?.homeCurrency);
 
   let rate: Rate | null = null;
   let rateFailed = false;

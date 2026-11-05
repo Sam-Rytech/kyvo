@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { createDb } from '@/db';
-import { tokens } from '@/db/schema';
+import { tokens, users } from '@/db/schema';
 import { decryptToken } from '@/lib/auth/crypto';
 import { ReauthRequiredError, refreshAccessToken } from '@/lib/auth/google';
 import { getSession } from '@/lib/auth/session';
@@ -25,11 +25,14 @@ export async function POST() {
   const reauth = () => NextResponse.json({ error: 'Gmail access expired', reauth: true }, { status: 401 });
 
   try {
-    const [token] = await db.select().from(tokens).where(eq(tokens.userId, session.userId));
+    const [[token], [user]] = await Promise.all([
+      db.select().from(tokens).where(eq(tokens.userId, session.userId)),
+      db.select({ homeCurrency: users.homeCurrency }).from(users).where(eq(users.id, session.userId)),
+    ]);
     if (!token) return reauth();
     const accessToken = await refreshAccessToken(decryptToken(token.refreshTokenEnc, process.env.TOKEN_ENC_KEY as string));
 
-    const scan = await scanBatch({ store: postgresScanStore(db), gmail: createGmailClient(accessToken), extract: createExtractor() }, session.userId);
+    const scan = await scanBatch({ store: postgresScanStore(db), gmail: createGmailClient(accessToken), extract: createExtractor(user?.homeCurrency) }, session.userId);
     const drain = await drainOnce(postgresDrainStore(db), getMemWal());
     return NextResponse.json({ scan, drainError: drain.error ?? null, outbox: await outboxCounts(db, session.userId) });
   } catch (error) {
