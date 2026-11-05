@@ -127,6 +127,17 @@ describe('Telegram link codes', () => {
     expect(readLinkCode(code, ROOT, 1_000_000)).toBe('7604856287b9c3e7');
   });
 
+  it('reads back every code, including signatures that contain underscores', () => {
+    let withUnderscore = 0;
+    for (let i = 0; i < 300; i++) {
+      const userId = (0x7604856287b9 + i).toString(16).padStart(16, '0');
+      const code = makeLinkCode(userId, ROOT, 1_000_000 + i);
+      if (code.split('_').length > 3) withUnderscore++;
+      expect(readLinkCode(code, ROOT, 1_000_000 + i)).toBe(userId);
+    }
+    expect(withUnderscore).toBeGreaterThan(0);
+  });
+
   it('expires, and refuses a forged or wrong-key code', () => {
     const code = makeLinkCode('u1', ROOT, 1_000_000);
     expect(readLinkCode(code, ROOT, 1_000_000 + 60 * 60 * 1000 + 1)).toBeNull();

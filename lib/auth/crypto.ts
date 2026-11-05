@@ -32,11 +32,10 @@ export function makeLinkCode(userId: string, root: string, now: number = Date.no
 }
 
 export function readLinkCode(code: string, root: string, now: number = Date.now()): string | null {
-  const parts = code.split('_');
-  if (parts.length < 3) return null;
-  const signature = parts.pop() as string;
-  const expiry = parts.pop() as string;
-  const userId = parts.join('_');
+  // The signature is base64url, so it can contain underscores itself. Only the first two separate fields.
+  const [userId, expiry, ...rest] = code.split('_');
+  const signature = rest.join('_');
+  if (!userId || !expiry || !signature) return null;
   const expected = createHmac('sha256', subkey(root, 'telegram-link')).update(`${userId}_${expiry}`).digest().subarray(0, 16);
   const given = Buffer.from(signature, 'base64url');
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
