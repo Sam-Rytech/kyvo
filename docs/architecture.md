@@ -94,7 +94,7 @@ flowchart LR
 | FX | Tatum Data API `GET /v4/data/rate/symbol` and OHLCV | Supports NGN, GHS, KES, EGP and other fiats |
 | Wallet | `@mysten/dapp-kit` | Connect the vault and family-member wallets |
 | Inbox | Gmail API, `gmail.readonly` scope (Outlook via Microsoft Graph `Mail.Read` is a stretch) | Automatic data |
-| LLM | Vercel AI SDK + Groq free plan (`openai/gpt-oss-20b`), with `generateObject` and Zod | Strict JSON extraction at no cost; no default retention of inference data |
+| LLM | Vercel AI SDK + Groq free plan (`openai/gpt-oss-20b`), with `generateText`, `Output.object` and Zod | Strict JSON extraction at no cost; no default retention of inference data |
 | Notifications | Telegram Bot API via `grammy` (webhook) | Free; instant reminders |
 | Tests | Vitest + `MemWalMock` | `MemWalMock` lacks `listMemories`, so test the rebuild path against the real relayer |
 

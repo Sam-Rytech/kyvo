@@ -17,6 +17,7 @@
     "probe:tatum": "node --env-file=.env.local --import tsx scripts/probe-tatum.ts"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^4.0.76",
     "@mysten-incubation/memwal": "0.1.13",
     "@mysten/seal": "^1.5.3",
     "@mysten/sui": "^2.39.0",

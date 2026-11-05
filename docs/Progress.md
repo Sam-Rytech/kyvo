@@ -36,11 +36,11 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 2 (Fri Nov 6): inbox to memory
-- [ ] Google OAuth sign-in; encrypted refresh-token storage
-- [ ] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill
-- [ ] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails
+- [~] Google OAuth sign-in; encrypted refresh-token storage. Built and unit-tested, not yet used against real Google
+- [~] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill. Built and unit-tested, not yet run on real mail
+- [~] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails. Works against real Groq on synthetic emails; the 15 real emails are still to do
 - [-] Forwarding fallback endpoint: moved to the top of the cut order; build only if Gmail OAuth fails
-- [ ] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button
+- [~] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button. Built and unit-tested, not yet run live
 
 **Gate 2:** connecting your own Gmail populates the subscriptions list automatically, and every item has a blob ID. Wiping the database and pressing Total Recall restores the same list.
 
