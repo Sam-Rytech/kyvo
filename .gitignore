@@ -5,15 +5,20 @@
 # Dependencies
 node_modules/
 
-# Next.js and Vercel
+# Next.js, Vite and Vercel
 .next/
 out/
+dist/
 .vercel/
 next-env.d.ts
 *.tsbuildinfo
 
 # Tests
 coverage/
+
+# AI Builder platform markers
+.scaffolded
+.opencode/
 
 # OS and logs
 .DS_Store
