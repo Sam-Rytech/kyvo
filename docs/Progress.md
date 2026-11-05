@@ -8,12 +8,13 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 0 (Wed Nov 4, tonight): accounts and keys
-- [ ] Tatum account → API key + **dashboard account ID** (needed for the form)
-- [ ] Walrus Memory dashboard (memory.walrus.xyz) → **mainnet** account. Record the account object ID, delegate private key and delegate **public** key (`MEMWAL_AGENT_ID`, 64 hex)
-- [ ] Sui wallet (Slush) with a little SUI and ≥ 1 USDC on mainnet (the vault, plus test family payments)
+- [x] Tatum account → API key + **dashboard account ID** (needed for the form)
+- [x] Walrus Memory dashboard (memory.walrus.xyz) → **mainnet** account. Record the account object ID, delegate private key and delegate **public** key (`MEMWAL_AGENT_ID`, 64 hex)
+- [~] Sui wallet (Slush) with a little SUI and ≥ 1 USDC on mainnet (the vault, plus test family payments): wallet exists; 0 USDC and 0 SUI on mainnet as of Nov 5, funds needed before Day 4
 - [ ] Google Cloud project → OAuth consent screen in **Testing** mode, scope `gmail.readonly`, add yourself and 2–3 friends as test users
 - [ ] Telegram bot via @BotFather
-- [ ] LLM API key; Neon Postgres database
+- [ ] LLM API key: Groq free plan, with Zero Data Retention on
+- [x] Neon Postgres database: project `kyvo`, connection tested
 - [ ] Join the Walrus and Tatum Discords. **Ask whether the Agent Payments prize exists** (the rules list a Mystery Bounty instead)
 - [x] GitHub repo `kyvo` (public, MIT): https://github.com/Sam-Rytech/kyvo
 - [x] Node upgraded to 22.23.4; `.env.example` and `.env.local` created; `TOKEN_ENC_KEY`, `NS_SALT`, `CRON_SECRET` generated. **Back up `NS_SALT` in a password manager**

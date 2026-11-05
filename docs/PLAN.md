@@ -49,7 +49,7 @@ Each one gets written into the docs on Day 0.
 | Tatum | Account and API key | `TATUM_API_KEY`; save the dashboard account ID for the form |
 | Google Cloud | Enable Gmail API, Testing mode, `gmail.readonly`, add test users, create OAuth client | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | @BotFather | Create bot | `TELEGRAM_BOT_TOKEN` |
-| Anthropic Console | API key (Claude Haiku, `claude-haiku-5-5`, one of the options in §4) | `LLM_API_KEY` |
+| console.groq.com | Free API key, no paid plan; turn on Zero Data Retention (changed from Anthropic to keep costs at zero, see architecture §4 and §9) | `LLM_API_KEY` |
 | Neon | Create database | `DATABASE_URL` |
 | Discords | Join both; ask whether the Agent Payments prize exists | Progress log |
 

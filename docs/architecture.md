@@ -94,7 +94,7 @@ flowchart LR
 | FX | Tatum Data API `GET /v4/data/rate/symbol` and OHLCV | Supports NGN, GHS, KES, EGP and other fiats |
 | Wallet | `@mysten/dapp-kit` | Connect the vault and family-member wallets |
 | Inbox | Gmail API, `gmail.readonly` scope (Outlook via Microsoft Graph `Mail.Read` is a stretch) | Automatic data |
-| LLM | Vercel AI SDK + Claude Haiku (`claude-haiku-5-5`), with `generateObject` and Zod | Strict JSON extraction |
+| LLM | Vercel AI SDK + Groq free plan (`openai/gpt-oss-20b`), with `generateObject` and Zod | Strict JSON extraction at no cost; no default retention of inference data |
 | Notifications | Telegram Bot API via `grammy` (webhook) | Free; instant reminders |
 | Tests | Vitest + `MemWalMock` | `MemWalMock` lacks `listMemories`, so test the rebuild path against the real relayer |
 
@@ -112,7 +112,7 @@ flowchart LR
 ### 5.2 Inbox scan (daily cron, plus a manual "scan now" button)
 - **Gmail query:** billing mail only. Example: `newer_than:1d (subject:(receipt OR invoice OR "payment" OR "trial" OR "renew" OR "price" OR "declined" OR "card") OR from:(netflix.com OR openai.com OR spotify.com OR aws OR vercel.com OR ...))`.
 - **Dedupe:** a SHA-256 hash of the Gmail message ID, stored in Postgres. The raw email body is never stored or logged.
-- **Extraction:** the LLM returns one typed event per email, validated by Zod. Discard the event if the model's confidence is below 0.6.
+- **Extraction:** the LLM returns one typed event per email, validated by Zod. Discard the event if the model's confidence is below 0.6. Groq's strict mode needs every field in `required` and `additionalProperties: false`, so optional fields in the extraction schema are nullable rather than omitted. Trim each email to its billing text before sending it, and let the resumable scan (§5.1) pause when the daily token limit is reached.
 - **Forwarding fallback:** first in the cut order, and built only if Gmail OAuth fails. How inbound mail would arrive isn't designed yet. It would reuse the same extractor.
 
 ```ts
@@ -237,6 +237,7 @@ USDC coin type on Sui mainnet: `0xdba34672e30cb065b1f93e3ab55318768fd6fef66c1594
 - **Server-only secrets:** `MEMWAL_KEY`, `TATUM_API_KEY`, Google client secret, Telegram token. Never prefix them with `NEXT_PUBLIC_`.
 - **Google refresh tokens** are encrypted at rest (AES-GCM, key in env).
 - **Raw emails** are never stored or logged. Only extracted facts are kept.
+- **LLM provider:** billing email text is sent to Groq for extraction. Groq says it doesn't retain inference data by default, but may log inputs and outputs for up to 30 days when troubleshooting failures or investigating abuse. Its data page doesn't state a training policy, so don't claim one. Turn on Zero Data Retention in the Groq console, and tell test users about this. Don't use the free Gemini tier: its terms say not to submit personal information and that human reviewers may read content.
 - **Namespaces** are derived server-side from the authenticated user. They're never taken from the request.
 - **Disclosure:** in the multi-tenant pattern, the operator account owns users' memories, as the Walrus docs state. Say so in the README and blog. Future work: a user-owned account with Kyvo as a revocable delegate.
 - **The MEMWAL owner key** never touches the server.
@@ -293,6 +294,7 @@ The Walrus Memory SDK doesn't read environment variables, so pass every value ex
 9. Gmail testing mode allows 100 test users, and logins expire after about 7 days. Re-connect before recording.
 10. Gasless USDC transfers below 0.01 failed for TwiceShy. Use amounts of 0.01 USDC or more.
 11. Tatum free plan: 3 requests per second and 100K credits.
+12. Groq's docs list `openai/gpt-oss-20b` at 30 requests/min, 1K requests/day, 8K tokens/min and 200K tokens/day, but it's unclear whether that table is the free plan. Check console.groq.com/settings/limits. A 12-month backfill may take more than one day of quota.
 
 ## 14. Demo (2:30) and blog
 - **Demo beats:** the decline notification hook → connect Gmail, and the dashboard fills itself → forecast with local currency → the memory beat (forecast-error chart, plus the "Ignore memory" toggle showing what a blank forecast would say) → registry ("6 services hold your card") and trial alert → Sui proof (vault balance, verified family payment, blob IDs, `/status`) → close.
