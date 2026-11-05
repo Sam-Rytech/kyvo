@@ -1,6 +1,6 @@
 // Warns before a charge can fail (architecture §7.2), from what this user's own history shows
 // and the rules their provider has really published. An unpublished rule stays unstated.
-import { getProviderRule, transactionFee } from '@/config/providers';
+import { fundingMarkup, getProviderRule, transactionFee } from '@/config/providers';
 import { diffDays, roundCents } from './dates';
 import { forecastMerchant } from './forecast';
 import { merchantHistories } from './history';
@@ -19,6 +19,7 @@ export type GuardAlert = {
   amount: number;
   card: string | null;
   provider: string | null;
+  markup: number;
   level: 'info' | 'watch' | 'danger';
   /** Distinct days a payment failed across the recent billing cycles */
   declinesRecent: number;
@@ -83,6 +84,7 @@ export function guardAlerts(events: CachedEvent[], homeCurrency: string | undefi
       amount: forecast.amount,
       card: forecast.card,
       provider,
+      markup: fundingMarkup(provider),
       level,
       declinesRecent,
       chargesRecent: recent.length,

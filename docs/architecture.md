@@ -182,7 +182,7 @@ type ExtractedEvent =
 - **Amount:** the last charge, adjusted by any `price_change`. For usage-billed merchants, the median of the last 3 bills.
 - **Card fee:** add the provider's per-transaction fee from the rules table (§7.3).
 - **Funding needed:** total charges in the next 30 days + fees + a buffer (5%, at least $1) − the known card balance, due two days before the first charge. A merchant more than 10 days overdue, or whose only recent bill was refunded, is treated as stopped. The card balance comes from top-up emails or is entered by the user; card providers expose no API.
-- **Local currency:** `fundLocal = fundUSD × rate(USDC→homeCurrency) × (1 + providerMarkup)`, with the rate from Tatum. Tatum's rate isn't what card providers charge, so local amounts always show as "≈" and each provider has a funding markup in the rules table. The default is set by comparing a real top-up with Tatum's rate.
+- **Local currency:** `fundLocal = fundUSD × rate(USDC→homeCurrency) × (1 + providerMarkup)`, with the rate from Tatum. Tatum's rate isn't what card providers charge, so local amounts always show as "≈" and each provider has a funding markup in the rules table. The markup is set by comparing a real payment with that day's market rate, and stays zero for a provider with none compared. Tatum's history endpoint returns USDC in dollars, not naira, so Zenith's 1.06% used a dated public USD/NGN rate. A forecast's markup is weighted by the amount on each card, and "Ignore memory" uses none.
 
 - **Comparing with no memory:** the "Ignore memory" forecast assumes the first price ever seen repeats monthly, forever: no fees, no refunds, nothing cancelled. Both forecasts are scored the same way. A first-ever bill counts as a miss for both.
 

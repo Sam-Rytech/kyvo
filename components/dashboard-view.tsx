@@ -38,7 +38,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
   const blankTotal = blank.reduce((sum, b) => sum + b.amount, 0);
   const blankBy = blank[0]?.nextDate ?? null;
   const shownTotal = ignoreMemory ? blankTotal : funding.total;
-  const local = approxLocal(shownTotal, rate, currency);
+  const local = approxLocal(shownTotal, rate, currency, ignoreMemory ? 0 : funding.markup);
 
   const records: WhyRecord[] = funding.items.flatMap((item) => item.basis.map((b) => ({ sentence: b.sentence, blobId: b.blobId })));
 
@@ -56,6 +56,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
     if (funding.unknownFees.length) notes.push(`No fee is included for ${funding.items.filter((i) => i.fee === null).map((i) => i.name).join(', ')}, because the card's fees couldn't be confirmed. The buffer helps cover this.`);
     if (funding.unknownBalanceCards.length) notes.push(`Nothing is subtracted for what's already on your card, because Kyvo doesn't know the balance. Add it on the Cards page.`);
     if (rate !== null && rateSource) notes.push(`Local amount uses the ${rateSource} USDC rate of ${rate.toLocaleString('en-US')} ${currency}, from Tatum. Your provider's rate will differ, so treat it as approximate.`);
+    if (funding.markup > 0) notes.push(`It adds about ${(funding.markup * 100).toFixed(2)}% for what your card provider charges above that rate, measured from a real payment.`);
     openWhy({
       title: `Fund ${usd(funding.total)} by ${shortDate(funding.fundBy)}`,
       summary: `Worked out from your own billing history, for the next 30 days. Fund two days early so the charge can't catch you short.`,

@@ -17,7 +17,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [x] Neon Postgres database: project `kyvo`, connection tested
 - [ ] Join the Walrus and Tatum Discords. **Ask whether the Agent Payments prize exists** (the rules list a Mystery Bounty instead)
 - [x] GitHub repo `kyvo` (public, MIT): https://github.com/Sam-Rytech/kyvo
-- [x] Node upgraded to 22.23.4; `.env.example` and `.env.local` created; `TOKEN_ENC_KEY`, `NS_SALT`, `CRON_SECRET` generated. **Back up `NS_SALT` in a password manager**
+- [x] Node upgraded to 22.23.4; `.env.example` and `.env.local` created; `TOKEN_ENC_KEY`, `NS_SALT`, `CRON_SECRET` generated. `NS_SALT` backed up by the owner
 
 **Gate 0:** every key is in `.env.local` and `node -v` is ≥ 22.23.4. **Passed Nov 5.** Tatum, Neon, Telegram and Groq tested live; Walrus and Google values format-checked only.
 
@@ -123,4 +123,5 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Day 4 built: vault, family payments, Telegram, daily cron, /status, /proof. 207 tests pass. Found the Tatum gateway now refuses address queries with no starting checkpoint, and `@mysten/dapp-kit` is deprecated: both handled and documented. **Gate 4 not passed yet.** | Owner: link Telegram; fund the wallet for the real payment |
 | Nov 5 | Telegram linked after fixing links whose signature contained an underscore. Live cron delivered a digest; a repeat run skipped it. Only the real USDC payment remains for Gate 4. | Owner's wallet funds |
 | Nov 5 | Real 0.01 USDC payment verified on Sui mainnet through Tatum, shown as paid, with a memory on Walrus. **Gate 4 passed. Day 4 complete.** | Naira amount for the funding markup; Discord question open |
-| Nov 5 | Day 5 built: Wrapped with share link and image, read-only demo account replacing all sample data, landing explanation, settings, custom providers, 8 currencies, not-found page, README, demo script and blog draft. 221 tests pass; production build checked at desktop and phone width. Secret scan over full history clean. One friend added as a Google test user. **Gate 5 not passed yet:** the demo isn't live until the owner reviews it. | Owner review of demo data; naira amount for the funding markup; Discord question open |
+| Nov 5 | Day 5 built: Wrapped with share link and image, read-only demo account replacing all sample data, landing explanation, settings, custom providers, 8 currencies, not-found page, README, demo script and blog draft. 221 tests pass; production build checked at desktop and phone width. Secret scan over full history clean. One friend added as a Google test user. **Gate 5 not passed yet:** the demo isn't live until the owner reviews it. | Owner review of demo data; Discord question open |
+| Nov 5 | Zenith funding markup set to 1.06% from a real payment: NGN 28,939 for $21.50 on Oct 18, against a market rate of about 1,331.90. One data point, so still shown as "≈". `NS_SALT` backup confirmed. | Owner review of demo data; Discord question open |

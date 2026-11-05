@@ -11,7 +11,7 @@ export type ProviderRule = {
   /** Charged on a successful payment */
   txnFee: { flatUsd?: number; pct?: number; minUsd?: number } | null;
   termination: { consecutiveDeclines: number | null; note: string } | null;
-  /** Local currency a provider charges above the market rate. Unknown until compared with a real top-up. */
+  /** Local currency a provider charges above the market rate, as a fraction. Null until compared with a real payment. */
   fundingMarkup: number | null;
   note?: string;
   sources: string[];
@@ -94,8 +94,9 @@ export const PROVIDERS: ProviderRule[] = [
     declineFee: null,
     txnFee: null,
     termination: null,
-    fundingMarkup: null,
-    note: 'No current Nigerian fee schedule could be found. A 2022 report put naira cards at a $20 monthly international limit, but larger charges have gone through since, so it is not applied.',
+    // One real payment: NGN 28,939 for $21.50 on Oct 18, 2026 is 1,346.00 per dollar, against a market rate of about 1,331.90 that day.
+    fundingMarkup: 0.0106,
+    note: 'No current Nigerian fee schedule could be found. A 2022 report put naira cards at a $20 monthly international limit, but larger charges have gone through since, so it is not applied. Naira amounts add about 1.06% above the market rate, measured from one real payment.',
     sources: ['https://www.thecable.ng/?p=672727'],
   },
   {
@@ -118,6 +119,11 @@ export const VAT_RATES: Record<string, number> = { NGN: 0.075 };
 export function getProviderRule(name: string | null | undefined): ProviderRule | null {
   if (!name) return null;
   return PROVIDERS.find((p) => p.name.toLowerCase() === name.toLowerCase() || p.id === name.toLowerCase()) ?? null;
+}
+
+/** Zero when no real payment has been compared yet: the local amount then uses the market rate. */
+export function fundingMarkup(provider: string | null | undefined): number {
+  return getProviderRule(provider)?.fundingMarkup ?? 0;
 }
 
 /** The fee on a payment, or null if unknown. Never a guess. */

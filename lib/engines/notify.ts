@@ -21,9 +21,9 @@ export const esc = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '
 export function buildNotifications({ events, homeCurrency, asOf, rate, vault }: NotifyInput): Notification[] {
   const now = new Date(`${asOf}T00:00:00Z`);
   const date = (d: string | null) => shortDate(d, now);
-  const local = (amount: number) => approxLocal(amount, rate, homeCurrency);
-  const withLocal = (amount: number) => {
-    const approx = local(amount);
+  const local = (amount: number, markup = 0) => approxLocal(amount, rate, homeCurrency, markup);
+  const withLocal = (amount: number, markup = 0) => {
+    const approx = local(amount, markup);
     return approx ? `${usd(amount)} (${approx})` : usd(amount);
   };
 
@@ -39,7 +39,7 @@ export function buildNotifications({ events, homeCurrency, asOf, rate, vault }: 
     const need = alert.shortfall ?? alert.amount;
     const lines = [
       `⚠️ <b>${esc(alert.name)}</b> bills ${usd(alert.amount)} on ${date(alert.nextDate)}.`,
-      alert.shortfall !== null ? `Your card looks ${usd(alert.shortfall)} short. Fund ${withLocal(need)}.` : `Fund ${withLocal(need)} if your card doesn't already hold it.`,
+      alert.shortfall !== null ? `Your card looks ${usd(alert.shortfall)} short. Fund ${withLocal(need, alert.markup)}.` : `Fund ${withLocal(need, alert.markup)} if your card doesn't already hold it.`,
     ];
     if (alert.declinesRecent > 0) lines.push(esc(alert.message));
     if (alert.rule) lines.push(esc(alert.rule));
@@ -71,7 +71,7 @@ export function buildNotifications({ events, homeCurrency, asOf, rate, vault }: 
 
   const digest: string[] = [];
   if (funding.total > 0) {
-    digest.push(`<b>Fund ${usd(funding.total)} by ${date(funding.fundBy)}</b>${local(funding.total) ? ` (${local(funding.total)})` : ''}`);
+    digest.push(`<b>Fund ${usd(funding.total)} by ${date(funding.fundBy)}</b>${local(funding.total, funding.markup) ? ` (${local(funding.total, funding.markup)})` : ''}`);
     for (const item of funding.items) digest.push(`• ${esc(item.name)}: ${usd(item.amount)} on ${date(item.nextDate)}`);
   }
   for (const alert of alerts) {

@@ -9,7 +9,7 @@ I built Kyvo for the Total Recall hackathon (Walrus x Tatum) to stop guessing. I
 Try the read-only demo: https://kyvo-five.vercel.app
 
 ## What it does
-You connect Gmail once. Kyvo finds your dollar subscriptions, trials, declines and refunds. Then it says something like "Fund $22.58 by 16 Nov, about ₦30,362," and you can open "Why?" to see the exact records behind that number.
+You connect Gmail once. Kyvo finds your dollar subscriptions, trials, declines and refunds. Then it says something like "Fund $22.58 by 16 Nov, about ₦30,700," and you can open "Why?" to see the exact records behind that number.
 
 It also warns you on Telegram, shows which services hold which card, reminds you of things you said you'd cancel, and checks family-plan payments on Sui.
 
@@ -48,7 +48,7 @@ Real data was much harder than my tests:
 - The operator account owns the memories, the pattern Walrus documents for multi-tenant apps. User-owned memory is future work.
 - The relayer sees plaintext when processing a memory. Blobs on Walrus are encrypted, but this is not end-to-end encryption.
 - Billing text goes to Groq for extraction, with Zero Data Retention on. Kyvo doesn't store raw email.
-- Local amounts use the market rate and are marked "≈". Providers charge their own rate.
+- Local amounts are marked "≈". One real Zenith payment showed a markup of about 1.06% over that day's market rate, so Zenith forecasts include it. Other providers use the market rate until a real payment is compared.
 - Card provider fees are only stated where a source confirmed them.
 
 The code is at https://github.com/Sam-Rytech/kyvo.

@@ -3,9 +3,9 @@ const SYMBOLS: Record<string, string> = { NGN: '₦', GHS: 'GH₵', KES: 'KSh ',
 export const usd = (amount: number) => `$${amount.toFixed(2)}`;
 
 /** Always approximate: card providers don't charge the market rate. */
-export function approxLocal(amountUsd: number, rate: number | null, currency: string): string | null {
+export function approxLocal(amountUsd: number, rate: number | null, currency: string, markup = 0): string | null {
   if (rate === null || currency === 'USD') return null;
-  return `≈ ${SYMBOLS[currency] ?? `${currency} `}${Math.round(amountUsd * rate).toLocaleString('en-US')}`;
+  return `≈ ${SYMBOLS[currency] ?? `${currency} `}${Math.round(amountUsd * rate * (1 + markup)).toLocaleString('en-US')}`;
 }
 
 /** Adds the year when it isn't the current one, so an old date can't be mistaken for a recent one. */

@@ -67,7 +67,7 @@ To see a demo account locally, copy `scripts/seed-data.example.json` to `scripts
 - **The operator owns the memories.** Kyvo uses the multi-tenant pattern Walrus documents: one operator account and one namespace per user. A user can't yet take their memories to another operator. A user-owned account with Kyvo as a delegate is future work.
 - **The Walrus relayer sees plaintext** when it processes a memory. Blobs on public Walrus are SEAL-encrypted (checked by downloading a raw blob), but this is not end-to-end encryption.
 - **Billing text goes to Groq** for extraction, with Zero Data Retention turned on. Raw email is never stored or logged by Kyvo.
-- **Local amounts are approximate.** They use the market USDC rate from Tatum and show "≈", because card providers charge their own rate. A provider's real markup is not applied yet.
+- **Local amounts are approximate.** They use the market USDC rate from Tatum and show "≈", because card providers charge their own rate. Only Zenith has a measured markup (about 1.06%, from one real payment). Other providers use the market rate until a real payment is compared.
 - **Hindcast is not live data.** The hackathon lasted days, not months, so the accuracy history is a replay of real emails. It's labelled as such everywhere, including on shared reports.
 - **Forecasts are only as good as the emails.** A bank that sends no receipt leaves no record, and Kyvo won't guess one.
 - **Card balances are typed in by hand,** because card providers have no API. Kyvo can't see them.

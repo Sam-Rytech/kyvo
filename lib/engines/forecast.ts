@@ -1,6 +1,6 @@
 // What's due, how much and when (architecture §7.1). The memory-less comparison lives here too,
 // because the two only mean something side by side.
-import { getProviderRule, transactionFee } from '@/config/providers';
+import { fundingMarkup, getProviderRule, transactionFee } from '@/config/providers';
 import { addDays, diffDays, medianOf, nextMonthlyDate, roundCents } from './dates';
 import { merchantHistories, type Basis, type MerchantHistory } from './history';
 import { cardStates } from './registry';
@@ -84,6 +84,8 @@ export type Funding = {
   buffer: number;
   knownBalance: number;
   total: number;
+  /** The cards' markup over the market rate, weighted by the amount on each card */
+  markup: number;
   fundBy: string | null;
   /** Merchants whose card has no confirmed fee, so none was added */
   unknownFees: string[];
@@ -126,6 +128,7 @@ export function buildFunding(events: CachedEvent[], homeCurrency: string | undef
     buffer,
     knownBalance,
     total: roundCents(Math.max(0, subtotal + buffer - knownBalance)),
+    markup: chargesTotal > 0 ? items.reduce((sum, item) => sum + item.amount * fundingMarkup(item.provider), 0) / chargesTotal : 0,
     fundBy,
     unknownFees: items.filter((item) => item.fee === null).map((item) => item.slug),
     unknownBalanceCards: balances.filter((b) => b.balance === null).map((b) => b.card),
