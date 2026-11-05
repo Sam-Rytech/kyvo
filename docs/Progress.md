@@ -25,11 +25,11 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 
 ## Day 1 (Thu Nov 5): foundations and proof that it works
 - [x] **AI Builder:** prompt ai.tatum.io for the Kyvo dashboard shell. Export it, commit, tag `ai-builder-v0`, and save the prompt in `docs/ai-builder/prompt.md`
-- [~] Next.js + Tailwind + Drizzle scaffold on top of the AI Builder UI; deploy to Vercel. UI ported to Next.js; Drizzle and deploy still to do
+- [x] Next.js + Tailwind + Drizzle scaffold on top of the AI Builder UI; deploy to Vercel: https://kyvo-five.vercel.app
 - [x] `scripts/probe-memwal.ts`: `health()` → `remember` → wait for `blob_id` → `recall` from a second process. Passed on mainnet. Blobs on public Walrus are encrypted (raw blob checked)
 - [x] `scripts/probe-tatum.ts`: GraphQL vault USDC balance; FX `USDC→NGN`; one transaction looked up by digest. Rate endpoint confirmed. OHLCV path found, parameters to finish when the FX history alert is built
 - [x] `lib/memory`: client, envelope encode/decode, namespace helper, outbox table plus drainer (paced, `rememberBulk`, idempotency, job polling). Tested live end to end on mainnet
-- [ ] Seed **≥ 12 real memories on mainnet** from your own real subscriptions (profile, 4 merchants, 2 cards, 1 promise, 1 trial)
+- [~] Seed **≥ 12 real memories on mainnet** from your own real subscriptions (profile, 4 merchants, 2 cards, 1 promise, 1 trial)
 
 **Gate 1 (hard):** ≥ 10 memories on mainnet with `blob_id`s · Tatum balance and FX calls return real data · the app is deployed. *If Walrus is down, keep coding against `MemWalMock` and retry the writes every few hours.*
 
@@ -113,3 +113,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 4 | Full build plan approved (`docs/PLAN.md`). Local repo set up, five open decisions recorded in the docs. Gate 0 not passed yet: external accounts and keys are still to do. | Accounts and keys |
 | Nov 5 | GitHub repo created and pushed. First Neon sign-in timed out at its 60-second limit; database not created yet. Gate 0 still open. | Accounts and keys; Neon sign-in |
 | Nov 5 | Neon, Google Cloud, Telegram and Groq set up. LLM switched to Groq to keep costs at zero. **Gate 0 passed.** Day 1 started. | Vault wallet has 0 USDC and 0 SUI; needs funds before Day 4. Discord question on the Agent Payments prize still open |
+| Nov 5 | Day 1: AI Builder export merged and tagged, UI ported to Next.js and live at kyvo-five.vercel.app. Probes pass on mainnet; drainer tested live; 28 unit tests pass. Gate 1 not passed yet: 12 real memories still to seed. | Owner's real subscription details for the seed |
