@@ -41,7 +41,7 @@ export function VaultCard({ address, runway, unavailable, rate, currency }: Prop
     } else setError(body?.error ?? "That didn't save. Check your connection and try again.");
   }
 
-  const local = runway ? approxLocal(runway.balance, rate, currency) : null;
+  const local = runway && runway.balance > 0 ? approxLocal(runway.balance, rate, currency) : null;
 
   return (
     <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm" aria-labelledby="vault-title">
