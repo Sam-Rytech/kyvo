@@ -29,9 +29,9 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [x] `scripts/probe-memwal.ts`: `health()` → `remember` → wait for `blob_id` → `recall` from a second process. Passed on mainnet. Blobs on public Walrus are encrypted (raw blob checked)
 - [x] `scripts/probe-tatum.ts`: GraphQL vault USDC balance; FX `USDC→NGN`; one transaction looked up by digest. Rate endpoint confirmed. OHLCV path found, parameters to finish when the FX history alert is built
 - [x] `lib/memory`: client, envelope encode/decode, namespace helper, outbox table plus drainer (paced, `rememberBulk`, idempotency, job polling). Tested live end to end on mainnet
-- [~] Seed **≥ 12 real memories on mainnet** from your own real subscriptions (profile, 4 merchants, 2 cards, 1 promise, 1 trial)
+- [x] Seed **≥ 12 real memories on mainnet** from your own real subscriptions (profile, 4 merchants, 2 cards, 1 promise, 1 trial): 15 stored under the demo account, from real Gmail receipts. 3 merchants, because no fourth dollar subscription exists
 
-**Gate 1 (hard):** ≥ 10 memories on mainnet with `blob_id`s · Tatum balance and FX calls return real data · the app is deployed. *If Walrus is down, keep coding against `MemWalMock` and retry the writes every few hours.*
+**Gate 1 (hard):** ≥ 10 memories on mainnet with `blob_id`s · Tatum balance and FX calls return real data · the app is deployed. *If Walrus is down, keep coding against `MemWalMock` and retry the writes every few hours.* **Passed Nov 5:** relayer lists 15 demo memories, all 15 recalled and decoded with matching blob IDs, raw blob unreadable on public Walrus, Tatum balance and FX real, site live.
 
 ---
 
@@ -47,7 +47,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 3 (Sat Nov 7): the engines (where the learning lives)
-- [ ] `config/providers.ts` rules table (re-verify fees from the sources in the README)
+- [ ] `config/providers.ts` rules table (re-verify fees from the sources in the README). Add **Zenith Bank** and **Bybit**, the owner's real cards
 - [ ] Forecast engine: date, amount, card fee, local-currency total; write `forecast` events
 - [ ] Forecast scoring: `forecast_result` events; error-per-month chart; the "Ignore memory" toggle
 - [ ] Decline guard plus provider-specific warnings
@@ -63,7 +63,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [ ] Family plan: create a plan, add members' Sui addresses, Tatum GraphQL payment matcher, lateness memory
 - [ ] **Real test:** 2 friends (or 2 of your own wallets) send ≥ 0.01 USDC each → auto-marked paid
 - [ ] Telegram bot: `/start` linking, daily digest, decline-guard alerts, trial alerts
-- [ ] Vercel Cron: daily scan → engines → notify
+- [ ] Vercel Cron: daily scan → engines → notify. Confirm Vercel's cron and function limits first (not yet checked)
 - [ ] `/status` page (timings for Tatum, Walrus and Gmail) and `/proof` page (memory count, blob links, Sui transaction links)
 
 **Gate 4:** a real USDC payment on Sui mainnet is verified through Tatum and shows as paid, with a memory written. A Telegram alert fires from the cron.
@@ -114,3 +114,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | GitHub repo created and pushed. First Neon sign-in timed out at its 60-second limit; database not created yet. Gate 0 still open. | Accounts and keys; Neon sign-in |
 | Nov 5 | Neon, Google Cloud, Telegram and Groq set up. LLM switched to Groq to keep costs at zero. **Gate 0 passed.** Day 1 started. | Vault wallet has 0 USDC and 0 SUI; needs funds before Day 4. Discord question on the Agent Payments prize still open |
 | Nov 5 | Day 1: AI Builder export merged and tagged, UI ported to Next.js and live at kyvo-five.vercel.app. Probes pass on mainnet; drainer tested live; 28 unit tests pass. Gate 1 not passed yet: 12 real memories still to seed. | Owner's real subscription details for the seed |
+| Nov 5 | 15 real memories seeded from the owner's Gmail receipts, including 2 real Claude Pro declines. Real data exposed a missing `refund` event kind, now added. **Gate 1 passed.** | Vault wallet still empty; Discord question open |
