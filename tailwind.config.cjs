@@ -12,7 +12,7 @@
 const tokens = require('./design-tokens/tailwind.tokens.cjs')
 
 module.exports = {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   // Matches the scope tokens.css uses for its dark palette.
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {

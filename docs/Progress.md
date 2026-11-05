@@ -24,8 +24,8 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 1 (Thu Nov 5): foundations and proof that it works
-- [~] **AI Builder:** prompt ai.tatum.io for the Kyvo dashboard shell. Export it, commit, tag `ai-builder-v0`, and save the prompt in `docs/ai-builder/prompt.md`
-- [ ] Next.js + Tailwind + Drizzle scaffold on top of the AI Builder UI; deploy to Vercel
+- [x] **AI Builder:** prompt ai.tatum.io for the Kyvo dashboard shell. Export it, commit, tag `ai-builder-v0`, and save the prompt in `docs/ai-builder/prompt.md`
+- [~] Next.js + Tailwind + Drizzle scaffold on top of the AI Builder UI; deploy to Vercel. UI ported to Next.js; Drizzle and deploy still to do
 - [ ] `scripts/probe-memwal.ts`: `health()` → `remember` → wait for `blob_id` → `recall` from a second process. **Confirm whether memory content is encrypted on Walrus before seeding real data; if it's public, stop and decide**
 - [ ] `scripts/probe-tatum.ts`: GraphQL vault USDC balance; FX `USDC→NGN`; one transaction looked up by digest. **Confirm the parameters of the rate and OHLCV endpoints**
 - [ ] `lib/memory`: client, envelope encode/decode, namespace helper, outbox table plus drainer (paced, `rememberBulk`, idempotency, job polling)

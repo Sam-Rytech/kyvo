@@ -491,7 +491,7 @@ export const SAMPLE_DATA = {
       reliabilityScore: '99.98%',
     },
     {
-      service: 'Tatum Data & Event Attestations',
+      service: 'Tatum Sui gateway',
       category: 'Blockchain Ledger Anchors',
       status: 'operational',
       lastResponseTimeMs: 89,
@@ -542,7 +542,7 @@ export const SAMPLE_DATA = {
         extractedDate: 'Oct 14, 2026',
         sourceDigest: 'sha256:7b919d3fca804c86e24f...',
         chainTxHash: '0x8f4c2e6b91d8a342981014e390c58741348bdf614451ec028a39e8',
-        chainNetwork: 'Ethereum Sepolia (Tatum Anchor)',
+        chainNetwork: 'Sui mainnet',
         verifiedStatus: 'attested',
       },
       {
@@ -552,7 +552,7 @@ export const SAMPLE_DATA = {
         extractedDate: 'Oct 11, 2026',
         sourceDigest: 'sha256:1a842f928e08d51190bc...',
         chainTxHash: '0x33b81ca849f8721ad0421e48fbb29147029514782bb1479831a291',
-        chainNetwork: 'Ethereum Sepolia (Tatum Anchor)',
+        chainNetwork: 'Sui mainnet',
         verifiedStatus: 'anchored',
       },
       {
@@ -562,7 +562,7 @@ export const SAMPLE_DATA = {
         extractedDate: 'Oct 23, 2026',
         sourceDigest: 'sha256:4d701e91c7f3941bca61...',
         chainTxHash: '0xaa1894b92c4e8574169c9b139df3019842a78103328e75294021bb',
-        chainNetwork: 'Polygon Amoy (Tatum Anchor)',
+        chainNetwork: 'Sui mainnet',
         verifiedStatus: 'attested',
       },
       {
@@ -572,7 +572,7 @@ export const SAMPLE_DATA = {
         extractedDate: 'Oct 09, 2026',
         sourceDigest: 'sha256:9c426e810a911f99c824...',
         chainTxHash: '0x174092bba4019ef84a179603e8571029bb14051a82f348123cba98',
-        chainNetwork: 'Ethereum Sepolia (Tatum Anchor)',
+        chainNetwork: 'Sui mainnet',
         verifiedStatus: 'anchored',
       },
     ] as ProofRecord[],

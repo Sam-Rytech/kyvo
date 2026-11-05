@@ -85,7 +85,7 @@ flowchart LR
 | Layer | Choice | Why |
 |---|---|---|
 | App | Next.js (App Router) + TypeScript + Tailwind | One deploy holds the UI, API and cron |
-| UI start | **Tatum AI Builder** (ai.tatum.io) generates the dashboard shell | AI Builder bonus; tag the commit `ai-builder-v0` |
+| UI start | **Tatum AI Builder** (ai.tatum.io) generates the dashboard shell. It exports Vite and Express, so the UI is ported to Next.js; tag `ai-builder-v0` marks the untouched export commit | AI Builder bonus |
 | Hosting | Vercel | Free tier, cron included |
 | Cache DB | Neon Postgres + Drizzle ORM | Serverless-friendly |
 | Memory | `@mysten-incubation/memwal` (pin the version; ≥ 0.1.11) | Mainnet relayer |
@@ -251,6 +251,8 @@ A read-only MCP endpoint `/api/mcp` with per-user tokens (`kyvo_upcoming`, `kyvo
 kyvo/
   app/                    Next.js routes: dashboard, subscriptions, trials, cards, family, wrapped, status, proof
   app/api/                auth, scan, outbox/drain, cron, telegram, chain, fx, rebuild
+  components/             app shell, "Why?" panel
+  design-tokens/          CSS variables and Tailwind tokens from the AI Builder export
   lib/memory/             client, envelope encode/decode, namespaces, outbox drainer, rebuild
   lib/chain/              tatum-graphql, tatum-grpc (native), usdc
   lib/fx/                 tatum-rates
