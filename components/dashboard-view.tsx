@@ -121,7 +121,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
 
         {shownTotal > 0 ? (
           <div className="flex items-baseline flex-wrap gap-x-sm gap-y-xs">
-            <p className="text-heading-xl font-bold text-primary font-mono tracking-tight">
+            <p className="text-heading-md sm:text-heading-xl font-bold text-primary font-mono tracking-tight">
               Fund {usd(shownTotal)} by {shortDate(ignoreMemory ? blankBy : funding.fundBy)}
             </p>
             {local && <span className="text-secondary text-lg font-mono">{local}</span>}
@@ -194,7 +194,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
                   <button key={month.month} onClick={() => explainMonth(month)} className="flex-1 min-w-0 flex flex-col items-center gap-xxs group focus-visible:ring-2 focus-visible:ring-focus-ring rounded" aria-label={`${monthLabel(month.month)}: off by ${usd(value)}. See why.`}>
                     <span className="text-xs font-mono text-tertiary group-hover:text-primary">{usd(value)}</span>
                     <span className="w-full max-w-[44px] h-28 flex items-end">
-                      <span style={{ height: `${Math.max(value > 0 ? 4 : 1, (value / top) * 100)}%` }} className={`w-full rounded-t-md ${ignoreMemory ? 'bg-utility-warning-500' : 'bg-brand-solid'}`} />
+                      <span style={{ height: `${Math.max(value > 0 ? 4 : 1, (value / top) * 100)}%` }} className={`w-full rounded-t-md ${ignoreMemory ? 'bg-utility-warning-600' : 'bg-brand-solid'}`} />
                     </span>
                   </button>
                 );

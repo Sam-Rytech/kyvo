@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { HelpCircle, X } from 'lucide-react';
 import { SAMPLE_DATA } from '@/lib/placeholder';
 
@@ -51,6 +51,15 @@ function sampleContent(subject: string): WhyContent {
 export function WhyProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<WhyContent | null>(null);
   const value = useMemo(() => ({ openWhy: setContent, openWhyModal: (subject: string) => setContent(sampleContent(subject)) }), []);
+
+  useEffect(() => {
+    if (!content) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setContent(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [content]);
 
   return (
     <WhyContext.Provider value={value}>

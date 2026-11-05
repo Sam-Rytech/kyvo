@@ -8,9 +8,11 @@ export function approxLocal(amountUsd: number, rate: number | null, currency: st
   return `≈ ${SYMBOLS[currency] ?? `${currency} `}${Math.round(amountUsd * rate).toLocaleString('en-US')}`;
 }
 
-export function shortDate(date: string | null): string {
+/** Adds the year when it isn't the current one, so an old date can't be mistaken for a recent one. */
+export function shortDate(date: string | null, now: Date = new Date()): string {
   if (!date) return '—';
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const sameYear = date.slice(0, 4) === String(now.getUTCFullYear());
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC', ...(sameYear ? {} : { year: 'numeric' }) });
 }
 
 export function monthLabel(month: string): string {

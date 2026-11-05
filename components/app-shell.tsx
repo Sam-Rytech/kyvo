@@ -98,6 +98,15 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
     }
   }
 
+  useEffect(() => {
+    if (!isRecallOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeRecall();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   const closeRecall = () => {
     if (recall.state === 'running') return;
     setIsRecallOpen(false);
