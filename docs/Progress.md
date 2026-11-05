@@ -47,7 +47,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 3 (Sat Nov 7): the engines (where the learning lives)
-- [ ] `config/providers.ts` rules table (re-verify fees from the sources in the README). Add **Zenith Bank** and **Bybit**, the owner's real cards
+- [ ] `config/providers.ts` rules table (re-verify fees from the sources in the README). Add **Zenith Bank** and **Bybit**, the owner's real cards. A provider not in the table must still get forecasts, with fees and warnings left out rather than guessed
 - [ ] Forecast engine: date, amount, card fee, local-currency total; write `forecast` events
 - [ ] Forecast scoring: `forecast_result` events; error-per-month chart; the "Ignore memory" toggle
 - [ ] Decline guard plus provider-specific warnings
@@ -72,7 +72,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 
 ## Day 5 (Mon Nov 9): polish and the shareable part
 - [ ] Dollar Wrapped monthly report page (shareable image and link)
-- [ ] Currency picker (NGN, GHS, KES, EGP, USD) to show global scope
+- [ ] Currency picker (NGN, GHS, KES, EGP, USD) to show global scope. Add a settings link so anyone can change their currency and cards later, and let people name a provider that isn't listed
 - [ ] Error, empty and loading states; mobile layout; a demo account seeded from your real data
 - [ ] Get 2–3 friends to connect Gmail (real usage evidence for the blog)
 - [ ] README: setup, architecture link, provider-fee sources, honest limits
@@ -115,4 +115,5 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Neon, Google Cloud, Telegram and Groq set up. LLM switched to Groq to keep costs at zero. **Gate 0 passed.** Day 1 started. | Vault wallet has 0 USDC and 0 SUI; needs funds before Day 4. Discord question on the Agent Payments prize still open |
 | Nov 5 | Day 1: AI Builder export merged and tagged, UI ported to Next.js and live at kyvo-five.vercel.app. Probes pass on mainnet; drainer tested live; 28 unit tests pass. Gate 1 not passed yet: 12 real memories still to seed. | Owner's real subscription details for the seed |
 | Nov 5 | 15 real memories seeded from the owner's Gmail receipts, including 2 real Claude Pro declines. Real data exposed a missing `refund` event kind, now added. **Gate 1 passed.** | Vault wallet still empty; Discord question open |
-| Nov 5 | Day 2: first real Gmail scan, 91 emails. Real data exposed wallet alerts read as subscriptions, double-counted declines and charges, false price hikes, and senders with stub plain-text parts: all fixed. 3 naira memories remain on Walrus, hidden by the view. **Gate 2 passed.** Emails read before the stub fix aren't re-read. | Owner to confirm card providers and review the 15 fixtures |
+| Nov 5 | Day 2: first real Gmail scan, 91 emails. Real data exposed wallet alerts read as subscriptions, double-counted declines and charges, false price hikes, and senders with stub plain-text parts: all fixed. 3 naira memories remain on Walrus, hidden by the view. **Gate 2 passed.** Emails read before the stub fix aren't re-read. | Owner to review the 15 fixtures and decide on rewriting git history |
+| Nov 5 | Owner's profile corrected to Zenith Bank and Bybit with a new memory; a rebuild restores the newest. | — |
