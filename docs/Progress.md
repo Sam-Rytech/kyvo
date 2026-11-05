@@ -11,20 +11,20 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [x] Tatum account → API key + **dashboard account ID** (needed for the form)
 - [x] Walrus Memory dashboard (memory.walrus.xyz) → **mainnet** account. Record the account object ID, delegate private key and delegate **public** key (`MEMWAL_AGENT_ID`, 64 hex)
 - [~] Sui wallet (Slush) with a little SUI and ≥ 1 USDC on mainnet (the vault, plus test family payments): wallet exists; 0 USDC and 0 SUI on mainnet as of Nov 5, funds needed before Day 4
-- [ ] Google Cloud project → OAuth consent screen in **Testing** mode, scope `gmail.readonly`, add yourself and 2–3 friends as test users
-- [ ] Telegram bot via @BotFather
-- [ ] LLM API key: Groq free plan, with Zero Data Retention on
+- [x] Google Cloud project `kyvo-513800` → OAuth consent screen in **Testing** mode, scope `gmail.readonly`, owner added as test user. Add 2–3 friends by Day 5; add redirect URIs on Day 2
+- [x] Telegram bot via @BotFather: @Kyvoalert_bot
+- [x] LLM API key: Groq free plan, key tested. Zero Data Retention to be turned on by the owner
 - [x] Neon Postgres database: project `kyvo`, connection tested
 - [ ] Join the Walrus and Tatum Discords. **Ask whether the Agent Payments prize exists** (the rules list a Mystery Bounty instead)
 - [x] GitHub repo `kyvo` (public, MIT): https://github.com/Sam-Rytech/kyvo
 - [x] Node upgraded to 22.23.4; `.env.example` and `.env.local` created; `TOKEN_ENC_KEY`, `NS_SALT`, `CRON_SECRET` generated. **Back up `NS_SALT` in a password manager**
 
-**Gate 0:** every key is in `.env.local` and `node -v` is ≥ 22.23.4.
+**Gate 0:** every key is in `.env.local` and `node -v` is ≥ 22.23.4. **Passed Nov 5.** Tatum, Neon, Telegram and Groq tested live; Walrus and Google values format-checked only.
 
 ---
 
 ## Day 1 (Thu Nov 5): foundations and proof that it works
-- [ ] **AI Builder:** prompt ai.tatum.io for the Kyvo dashboard shell. Export it, commit, tag `ai-builder-v0`, and save the prompt in `docs/ai-builder/prompt.md`
+- [~] **AI Builder:** prompt ai.tatum.io for the Kyvo dashboard shell. Export it, commit, tag `ai-builder-v0`, and save the prompt in `docs/ai-builder/prompt.md`
 - [ ] Next.js + Tailwind + Drizzle scaffold on top of the AI Builder UI; deploy to Vercel
 - [ ] `scripts/probe-memwal.ts`: `health()` → `remember` → wait for `blob_id` → `recall` from a second process. **Confirm whether memory content is encrypted on Walrus before seeding real data; if it's public, stop and decide**
 - [ ] `scripts/probe-tatum.ts`: GraphQL vault USDC balance; FX `USDC→NGN`; one transaction looked up by digest. **Confirm the parameters of the rate and OHLCV endpoints**
@@ -112,3 +112,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 4 | Idea locked: Kyvo (global, inbox auto-scan). Architecture and plan written. | — |
 | Nov 4 | Full build plan approved (`docs/PLAN.md`). Local repo set up, five open decisions recorded in the docs. Gate 0 not passed yet: external accounts and keys are still to do. | Accounts and keys |
 | Nov 5 | GitHub repo created and pushed. First Neon sign-in timed out at its 60-second limit; database not created yet. Gate 0 still open. | Accounts and keys; Neon sign-in |
+| Nov 5 | Neon, Google Cloud, Telegram and Groq set up. LLM switched to Groq to keep costs at zero. **Gate 0 passed.** Day 1 started. | Vault wallet has 0 USDC and 0 SUI; needs funds before Day 4. Discord question on the Agent Payments prize still open |
