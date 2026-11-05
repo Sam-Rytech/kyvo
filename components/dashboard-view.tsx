@@ -115,6 +115,15 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
     <div className="space-y-xl">
       <MemorySyncStatus />
 
+      {!telegram.linked && (
+        <section className="rounded-xl border border-secondary bg-primary p-lg shadow-xs flex flex-wrap items-center justify-between gap-sm" aria-label="Telegram alerts">
+          <p className="text-sm text-secondary">Get warned on Telegram before a charge can fail.</p>
+          <a href={telegram.linkUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand shrink-0">
+            Connect Telegram
+          </a>
+        </section>
+      )}
+
       <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-sm mb-xs">
           <h1 className="text-xs uppercase font-semibold tracking-wider text-tertiary">Next funding</h1>
@@ -223,7 +232,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
         <VaultCard address={vault.address} runway={vault.runway} unavailable={vault.unavailable} rate={rate} currency={currency} />
-        <TelegramCard linked={telegram.linked} linkUrl={telegram.linkUrl} />
+        {telegram.linked && <TelegramCard linked linkUrl={telegram.linkUrl} />}
         <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs" aria-labelledby="trials-title">
           <div className="flex items-center justify-between">
             <h2 id="trials-title" className="text-sm font-semibold text-primary">
