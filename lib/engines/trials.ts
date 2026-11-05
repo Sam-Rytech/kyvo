@@ -31,7 +31,8 @@ export function trialStates(events: CachedEvent[], asOf: string): TrialState[] {
     if (e.type === 'trial_start' && e.merchant) groups.set(e.merchant, [...(groups.get(e.merchant) ?? []), e]);
   }
 
-  const states = [...groups.entries()].map(([slug, list]): TrialState => {
+  const states = [...groups.entries()].map(([slug, unsorted]): TrialState => {
+    const list = [...unsorted].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || (a.event.src === 'user' ? 1 : 0) - (b.event.src === 'user' ? 1 : 0) || a.blobId.localeCompare(b.blobId));
     // The newest stated value wins, so a date the user confirmed replaces a missing one.
     const newest = <T,>(pick: (e: CachedEvent) => T | null) => list.map(pick).filter((v): v is T => v !== null).at(-1) ?? null;
     const endsAt = newest((e) => str(e.event.endsAt));
@@ -55,5 +56,5 @@ export function trialStates(events: CachedEvent[], asOf: string): TrialState[] {
     };
   });
 
-  return states.sort((a, b) => RANK[a.status] - RANK[b.status] || (a.daysLeft ?? 0) - (b.daysLeft ?? 0) || (b.endsAt ?? '').localeCompare(a.endsAt ?? ''));
+  return states.sort((a, b) => RANK[a.status] - RANK[b.status] || (a.daysLeft ?? 0) - (b.daysLeft ?? 0) || (b.endsAt ?? '').localeCompare(a.endsAt ?? '') || a.slug.localeCompare(b.slug));
 }

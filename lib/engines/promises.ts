@@ -27,7 +27,7 @@ export function promiseStates(events: CachedEvent[], asOf: string): PromiseState
   }
 
   const states = [...groups.entries()].map(([id, list]): PromiseState => {
-    const sorted = [...list].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''));
+    const sorted = [...list].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || a.blobId.localeCompare(b.blobId));
     const latest = sorted.at(-1) as CachedEvent;
     const madeOn = sorted[0].eventDate;
     const ageDays = madeOn ? diffDays(asOf, madeOn) : null;
@@ -43,5 +43,5 @@ export function promiseStates(events: CachedEvent[], asOf: string): PromiseState
       blobId: latest.blobId,
     };
   });
-  return states.sort((a, b) => Number(a.status === 'done') - Number(b.status === 'done') || (b.madeOn ?? '').localeCompare(a.madeOn ?? ''));
+  return states.sort((a, b) => Number(a.status === 'done') - Number(b.status === 'done') || (b.madeOn ?? '').localeCompare(a.madeOn ?? '') || a.id.localeCompare(b.id));
 }

@@ -116,7 +116,7 @@ export function pendingForecastMemories(events: CachedEvent[], userId: string, h
 
   // A live forecast is scored the moment its charge arrives (§6.3, steps 2 and 3).
   const histories = merchantHistories(events, homeCurrency);
-  for (const e of events) {
+  for (const e of [...events].sort((a, b) => a.blobId.localeCompare(b.blobId))) {
     const expected = e.event.expected;
     const predicted = e.event.amt;
     if (e.type !== 'forecast' || e.event.src !== 'live' || !e.merchant || typeof expected !== 'string' || typeof predicted !== 'number') continue;

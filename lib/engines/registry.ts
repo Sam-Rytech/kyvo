@@ -21,7 +21,7 @@ export type CardState = {
 
 function balanceOf(card: string, events: CachedEvent[]): number | null {
   const mine = events.filter((e) => str(e.event.card) === card && e.eventDate);
-  const anchor = mine.filter((e) => e.type === 'card_balance' && num(e.event.amt) !== null).sort((a, b) => (a.eventDate as string).localeCompare(b.eventDate as string)).at(-1);
+  const anchor = mine.filter((e) => e.type === 'card_balance' && num(e.event.amt) !== null).sort((a, b) => (a.eventDate as string).localeCompare(b.eventDate as string) || a.blobId.localeCompare(b.blobId)).at(-1);
   if (!anchor) return null;
 
   // One day and amount counts once, as in the merchant history.
@@ -48,7 +48,7 @@ export function cardStates(events: CachedEvent[], asOf: string): CardState[] {
   }
 
   return [...cards].sort().map((card) => {
-    const mine = events.filter((e) => str(e.event.card) === card).sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''));
+    const mine = events.filter((e) => str(e.event.card) === card).sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || a.blobId.localeCompare(b.blobId));
 
     const holders = new Map<string, CardHolder>();
     for (const e of mine) {
@@ -72,7 +72,7 @@ export function cardStates(events: CachedEvent[], asOf: string): CardState[] {
       card,
       provider: named ? str(named.event.provider) : null,
       balance: balanceOf(card, events),
-      holders: [...holders.values()].sort((a, b) => b.lastSeen.localeCompare(a.lastSeen)),
+      holders: [...holders.values()].sort((a, b) => b.lastSeen.localeCompare(a.lastSeen) || a.slug.localeCompare(b.slug)),
     };
   });
 }

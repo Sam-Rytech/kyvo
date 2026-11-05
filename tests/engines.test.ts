@@ -289,6 +289,25 @@ describe('buildHindcast', () => {
   });
 });
 
+describe('results never depend on event order, as after a Total Recall', () => {
+  const shuffled = () => {
+    const events = real();
+    return { forward: events, backward: [...events].reverse(), rotated: [...events.slice(7), ...events.slice(0, 7)] };
+  };
+
+  it.each(['backward', 'rotated'] as const)('hindcast, funding and memories match when %s', (order) => {
+    const { forward, ...others } = shuffled();
+    const other = others[order];
+    expect(buildHindcast(other, 'NGN', NOW)).toEqual(buildHindcast(forward, 'NGN', NOW));
+    expect(buildFunding(other, 'NGN', NOW)).toEqual(buildFunding(forward, 'NGN', NOW));
+    expect(blankForecasts(merchantHistories(other, 'NGN'), NOW)).toEqual(blankForecasts(merchantHistories(forward, 'NGN'), NOW));
+    expect(guardAlerts(other, 'NGN', NOW)).toEqual(guardAlerts(forward, 'NGN', NOW));
+    expect(cardStates(other, NOW)).toEqual(cardStates(forward, NOW));
+    expect(trialStates(other, NOW)).toEqual(trialStates(forward, NOW));
+    expect(pendingForecastMemories(other, 'u1', 'NGN', NOW)).toEqual(pendingForecastMemories(forward, 'u1', 'NGN', NOW));
+  });
+});
+
 describe('pendingForecastMemories', () => {
   it('writes hindcast and live events with stable keys and no blob-less claims', () => {
     const items = pendingForecastMemories(real(), 'u1', 'NGN', NOW);

@@ -37,7 +37,8 @@ export function merchantHistories(events: CachedEvent[], homeCurrency?: string):
   }
 
   const histories = new Map<string, MerchantHistory>();
-  for (const [slug, list] of groups) {
+  // Sorted, so results never depend on the order events arrive in, as after a Total Recall.
+  for (const [slug, list] of [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     if (!isForeignBilled(list, homeCurrency)) continue;
     const sorted = [...list].sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? '') || a.blobId.localeCompare(b.blobId));
 
