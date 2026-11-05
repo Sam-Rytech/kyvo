@@ -19,7 +19,8 @@ describe.runIf(fixtures.length > 0)('reviewed email fixtures', () => {
   });
 
   it('nothing personal got in', () => {
-    const all = JSON.stringify(fixtures);
+    // The real text, because in escaped JSON a line break turns user@ into nuser@.
+    const all = fixtures.map(({ email }) => `${email.from}\n${email.subject}\n${email.text}`).join('\n');
     const addresses = all.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? [];
     expect(addresses.filter((address) => address !== 'user@example.com')).toEqual([]);
     expect(all).not.toMatch(/\b\d{2,}[xX*•]{2,}\d{2,}\b/); // masked account numbers

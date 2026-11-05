@@ -38,7 +38,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ## Day 2 (Fri Nov 6): inbox to memory
 - [x] Google OAuth sign-in; encrypted refresh-token storage
 - [x] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill. 91 real emails read, 23 memories stored
-- [~] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails. All 15 extract correctly; waiting on the owner's review before the redacted emails are committed
+- [x] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails. Reviewed by the owner and committed; 15/15 correct on the real model (`pnpm eval:extractor`)
 - [-] Forwarding fallback endpoint: moved to the top of the cut order; build only if Gmail OAuth fails
 - [x] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button
 
@@ -118,3 +118,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Day 2: first real Gmail scan, 91 emails. Real data exposed wallet alerts read as subscriptions, double-counted declines and charges, false price hikes, and senders with stub plain-text parts: all fixed. 3 naira memories remain on Walrus, hidden by the view. **Gate 2 passed.** Emails read before the stub fix aren't re-read. | Owner to review the 15 fixtures and decide on rewriting git history |
 | Nov 5 | Owner's profile corrected to Zenith Bank and Bybit with a new memory; a rebuild restores the newest. | — |
 | Nov 5 | Rewrote git history to remove real card digits and receipt numbers from early test files; force-pushed with the owner's approval. `ai-builder-v0` unchanged. Old commits stay reachable on GitHub only by exact hash. | — |
+| Nov 5 | Owner reviewed and approved the 15 redacted email fixtures: committed, 15/15 on the real model. **Day 2 complete.** | Vault wallet empty; Discord question open |

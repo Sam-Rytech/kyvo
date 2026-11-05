@@ -1,0 +1,229 @@
+[
+  {
+    "email": {
+      "id": "fixture-1",
+      "from": "Anthropic, PBC <user@example.com>",
+      "subject": "Your receipt from Anthropic, PBC #REDACTED",
+      "date": "2026-10-18",
+      "text": "Anthropic, PBC (\nAnthropic, PBC\nReceipt from Anthropic, PBC $21.50 Paid on October 18, 2026 with - 0000 (invoice illustration [\nReceipt #REDACTED Oct 18–Nov 18, 2026 Claude Pro Qty 1 $20.00 Subtotal $20.00 Total excluding tax $20.00 VAT - Nigeria (7.5%) $1.50 Total $21.50 Amount paid $21.50 Download receipt ( Download invoice (\nQuestions? Visit our support site (\nPowered by stripe logo ("
+    },
+    "expected": {
+      "kind": "charge",
+      "merchant": "Anthropic",
+      "amount": 21.5,
+      "currency": "USD",
+      "date": "2026-10-18",
+      "cardHint": "0000"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-2",
+      "from": "Anthropic, PBC <user@example.com>",
+      "subject": "$20.00 payment to Anthropic, PBC was unsuccessful",
+      "date": "2026-09-18",
+      "text": "Anthropic, PBC (\nAnthropic, PBC\n$20.00 payment to Anthropic, PBC was unsuccessful We were unable to charge your Mastercard ending in 0000 for your Anthropic, PBC subscription. Please update your billing information to continue your subscription. Update payment method (\nPowered by stripe logo ("
+    },
+    "expected": {
+      "kind": "decline",
+      "merchant": "Anthropic",
+      "amount": 20,
+      "currency": "USD",
+      "date": "2026-09-18",
+      "cardHint": "0000",
+      "reason": "payment was unsuccessful"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-3",
+      "from": "Anthropic <user@example.com>",
+      "subject": "Your subscription access has been paused",
+      "date": "2026-09-18",
+      "text": "Your subscription access has been paused\nYour most recent payment was unsuccessful, and your access to Claude's paid features has been paused. To restore access, please pay the outstanding invoice.\nNote: If you pay a late invoice, your billing cycle will reset to the date of payment.\nPay invoice\nGo to billing settings\nFor any further questions, please visit our help center .\nClaude.ai · Research · Products · Company\nAnthropic PBC, 548 Market St, PMB 90375, San Francisco, CA 94104"
+    },
+    "expected": {
+      "kind": "decline",
+      "merchant": "Anthropic",
+      "date": "2026-09-18",
+      "reason": "payment unsuccessful"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-4",
+      "from": "InstaWP Inc <user@example.com>",
+      "subject": "Your receipt from InstaWP Inc #REDACTED",
+      "date": "2026-08-24",
+      "text": "InstaWP Inc (\nInstaWP Inc\nReceipt from InstaWP Inc $4.51 Paid August 24, 2026 (invoice illustration [ Download invoice ( Download receipt ( Receipt number REDACTED Invoice number REDACTED Payment method - 0000\nReceipt #REDACTED Jul 24–Aug 24, 2026 Sites Qty 93 $6.51 $0.07 each Total $6.51 Applied balance -$2.00 Amount paid $4.51 Questions? Visit our support site ( contact us at user@example.com (user@example.com), or call us at PHONE (tel:PHONE).\nInstaWP Inc contributes 1% of purchases to remove CO₂ from the atmosphere.\nPowered by stripe logo ("
+    },
+    "expected": {
+      "kind": "usage_bill",
+      "merchant": "InstaWP",
+      "amount": 4.51,
+      "currency": "USD",
+      "period": "Jul 24–Aug 24, 2026",
+      "date": "2026-08-24",
+      "cardHint": "0000"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-5",
+      "from": "InstaWP <user@example.com>",
+      "subject": "Your InstaWP usage invoice is ready",
+      "date": "2026-08-24",
+      "text": "Your InstaWP usage invoice is ready\nHi REDACTED REDACTED ,\nYour InstaWP usage invoice is ready. You can download it using the button below.\nDownload invoice\nIf you have any questions about your invoice, please reach out to our support team at user@example.com .\nFacebook\nLinkedIn\nX\nYouTube\nNotification Settings\nRefer to Earn $25\n3911 Concord Pike, 8030, Wilmington, DE 19803, USA\n2026 InstaWP. All rights reserved."
+    },
+    "expected": {
+      "kind": "none"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-6",
+      "from": "InstaWP <user@example.com>",
+      "subject": "Your upcoming invoice ($4.51) is due on Aug 24, 2026",
+      "date": "2026-08-22",
+      "text": "[InstaWP](\nHi REDACTED REDACTED,\nHeads up — your next invoice is scheduled to be charged in 3 days, on Aug 24, 2026. Here's a summary of your estimated charges based on usage so far this billing cycle.\nEstimated total\n$4.51\nDue on\nAug 24, 2026 at 13:02 UTC\nSubtotal\n$6.51\nCredit balance\n-$2.00\nUsage this cycle (24 Jul, 2026 - 24 Aug, 2026)\nSites (3)\n$6.51\nNo action is needed — the invoice will be charged automatically to your saved payment method. If you want to review your usage or update your billing details, you can do that any time.\nReview billing\nThis is an estimate: usage so far this billing period plus a projection for the remaining 2 days based on your current daily run-rate. The final invoice may differ if your usage changes before Aug 24, 2026.\n© 2026 InstaWP. All rights reserved."
+    },
+    "expected": {
+      "kind": "none"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-7",
+      "from": "InstaWP Inc <user@example.com>",
+      "subject": "Your refund from InstaWP Inc #REDACTED",
+      "date": "2026-08-25",
+      "text": "InstaWP Inc (\nInstaWP Inc\nRefund from InstaWP Inc $4.51 Refunded on August 25, 2026 (invoice illustration [ Download invoice ( Download receipt ( Receipt number REDACTED Invoice number REDACTED Refunded to - 0000\nReceipt #REDACTED Jul 24–Aug 24, 2026 Sites Qty 93 $6.51 $0.07 each Total $6.51 Applied balance -$2.00 Amount paid $4.51 Total refunded without credit note $4.51 Questions? Visit our support site ( contact us at user@example.com (user@example.com), or call us at PHONE (tel:PHONE).\nPowered by stripe logo ("
+    },
+    "expected": {
+      "kind": "refund",
+      "merchant": "InstaWP",
+      "amount": 4.51,
+      "currency": "USD",
+      "date": "2026-08-25"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-8",
+      "from": "InstaWP Inc <user@example.com>",
+      "subject": "Your InstaWP Inc receipt [#REDACTED]",
+      "date": "2026-05-24",
+      "text": "Receipt from InstaWP Inc Receipt #REDACTED\nAmount paid\n$2.00\nDate paid\nMay 24, 2026, 6:37:51 PM\nPayment method\n- 0000\nSummary\n- - InstaWP Credit Purchase - $2 : $2.00\n- Amount paid : $2.00\nInstaWP Inc contributed 1% of your purchase to remove CO₂ from the atmosphere.\nIf you have any questions, visit our support site at ( contact us at user@example.com (user@example.com), or call us at PHONE (tel:PHONE).\nSomething wrong with the email? View in browser: (\nYou're receiving this email because you made a purchase at InstaWP Inc, which partners with Stripe ( to provide invoicing and payment processing."
+    },
+    "expected": {
+      "kind": "charge",
+      "merchant": "InstaWP",
+      "amount": 2,
+      "currency": "USD",
+      "date": "2026-05-24",
+      "cardHint": "0000"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-9",
+      "from": "Vercel Inc. <user@example.com>",
+      "subject": "Your receipt from Vercel Inc. #REDACTED",
+      "date": "2026-06-21",
+      "text": "Vercel Inc. (\nVercel Inc.\nReceipt from Vercel Inc. $0.99 Paid June 21, 2026 (invoice illustration [ Download invoice ( Download receipt ( Receipt number REDACTED Invoice number REDACTED Payment method - 0000\nReceipt #REDACTED Domain purchase - example.test Qty 1 $0.99 Total $0.99 Amount paid $0.99 Questions? Visit our support site ( or contact us at user@example.com (user@example.com).\nPowered by stripe logo ( | Learn more about Stripe Invoicing ("
+    },
+    "expected": {
+      "kind": "charge",
+      "merchant": "Vercel",
+      "amount": 0.99,
+      "currency": "USD",
+      "date": "2026-06-21",
+      "cardHint": "0000"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-10",
+      "from": "GitLab <user@example.com>",
+      "subject": "Welcome to your GitLab Ultimate trial! 👋",
+      "date": "2026-10-16",
+      "text": "Get started in 4 simple steps.\n<\nWelcome to your GitLab Ultimate trial with Duo Agent Platform!\nYou now have access to GitLab's paid features for 30 days. GitLab CI/CD helps\nyou build, test, and deploy your applications at scale.\nGet started by connecting your repository\n<\n<\nand setting up your first pipeline.\nConnect to your repository\n<\n4 tips to get started:\n<\nImport your existing projects\n<\nMove your projects from GitHub, Bitbucket, and more with full commit history\nintact. Not ready to fully migrate?Mirror your repository\n<\ninstead.\n<\nCreate and run your first pipeline\n<\nGitLab comes with everything you need to automate building, testing,\npackaging, and deploying your applications.\n<\nExplore the CI/CD Catalog\n<\nBrowse published pipeline components you can use instead of building from\nscratch.\n<\nSee how GitLab CI/CD works with GitHub\n<\nComing from GitHub? Watch a short demo\n<\non how to connect your GitHub repository directly to a GitLab pipeline and run\nbuilds, tests, and deployments without moving your code.\nGo to GitLab\n<\n<\nLet AI handle the repetitive work\nGitLab Duo Agent Platform automates your tasks, connects existing tools, and\naccelerates delivery from code to production.Browse our AI Resource Library\n<\nfor 100+ ready-to-use examples.\nGet started >\n<\n<\nView Web Version\n<\n|Blog\n<\n|Facebook < | YouTube\n< | LinkedIn\n<\nGitLab Inc. 268 Bush Street, #REDACTED, San Francisco, CA 94104, USA\nThis email was sent to user@example.com. Please visit the GitLab\nemail subscription portal\n<\nto update your preferences. If you no longer wish to receive marketing emails\nfrom us, you mayunsubscribe\n<\nat any time."
+    },
+    "expected": {
+      "kind": "trial_start",
+      "merchant": "GitLab",
+      "date": "2026-10-16"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-11",
+      "from": "OPay <user@example.com>",
+      "subject": "Payment Successful",
+      "date": "2026-10-18",
+      "text": "Dear REDACTED REDACTED REDACTED ,\nYour payment of\n₦35,960.00\nis successful.\nYour available balance is\n₦35,941.98 .\nPayment Details:\nTransaction No.:\nREDACTED\nMerchant Name:\nUnlimint Nigeria Limited\nMerchant Order Number:\nREDACTED\nTransaction Date:\nOct 18th, 2026 23:17:45\nFor further enquiries, please contact our customer\nsupport through the following channels:\nPhone： PHONE\nEmail： user@example.com\nThank you for choosing OPay.\nThe OPay Team\nAlexander House, Otunba Jobi Fele way, Ikeja, Lagos\nCopyright Ⓒ 2026 OPay Digital Services Limited - RC 883275\nOPay is a mobile money platform operated by OPay Digital\nServices Limited. OPay is licensed by the Central Bank of\nNigeria (CBN) and all deposits are insured by the Nigerian\nDeposit Insurance Corporation (NDIC).\nClick here to unsubscribe"
+    },
+    "expected": {
+      "kind": "none"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-12",
+      "from": "Bybit <user@example.com>",
+      "subject": "[Bybit]Bybit Card - Your Transaction Authorization Was Declined",
+      "date": "2026-04-19",
+      "text": "Dear Bybit Card holder,\nBybit Card: Your transaction of 0.13 USD to PAYPAL on 2026-04-19 21:44:37 failed: Incorrect card expiry date entered. Please make sure you enter the same code as can be found on the back of your card, or in the app..\nIf you have any questions regarding this matter, please submit a case via this form .\nRegards,\nThe Bybit Card Team\nNever miss a beat on our latest product updates and events.\nTrade on the go with Bybit\nLatest Promotions\nHelp Center\nUnsubscribe\nCopyright @2018 - 0000 Bybit. All rights reserved."
+    },
+    "expected": {
+      "kind": "decline",
+      "merchant": "PayPal",
+      "amount": 0.13,
+      "currency": "USD",
+      "date": "2026-04-19",
+      "reason": "Incorrect card expiry date entered."
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-13",
+      "from": "Google Play <user@example.com>",
+      "subject": "Your Google Play Order Receipt from 13 Apr 2026",
+      "date": "2026-04-13",
+      "text": "Google Play\nThank you\nYou have signed up for a Monthly Subscription (CapCut: Photo & Video\nEditor) subscription with a trial. Your trial will end on 20 Apr 2026. You\nwill be automatically charged the subscription cost (₦900.00 for 1 month\nstarting on 20 Apr 2026, then ₦6,900.00/month starting on 20 May 2026)\nunless cancelled. You can cancel at any time. Manage your subscriptions\nOrder number: GPA.REDACTED\nOrder date: 13 Apr 2026 17:14:34 GMT+1\nYour account: user@example.com\nItem Price\nMonthly Subscription (CapCut: Photo & Video Editor) ₦0.00\nAuto-renewing subscription\nTotal: ₦0.00\n(Includes VAT of ₦0.00)\nPayment method:\nVerve-0000\nBy subscribing, you authorise us to charge you the subscription cost (as\ndescribed above) automatically, charged to the payment method provided\nuntil cancelled. Learn how to cancel. Keep this for your records.\nQuestions? Visit Bytedance Pte. Ltd..\nGoogle Play\nAll your entertainment in one place, available anywhere. Learn more ›\nSee your Google Play order history.\nView the Google Play Refund Policy and the Terms of Service.\n© 2026 Google | All Rights Reserved.\nGoogle Commerce Limited, Gordon House, Barrow Street, Dublin 4, Ireland\nPlease don't reply to this email, as we are unable to respond from this\nemail address. If you need support, visit the Google Play Help Centre."
+    },
+    "expected": {
+      "kind": "trial_start",
+      "merchant": "CapCut",
+      "date": "2026-04-13",
+      "endsAt": "2026-04-20"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-14",
+      "from": "Paystack <user@example.com>",
+      "subject": "Receipt from Glovo_Nigeria [REDACTED]",
+      "date": "2026-09-11",
+      "text": "If you have any issues with\npayment, kindly reply to this email or send an email to\nuser@example.com\nGlovo_Nigeria received your payment of\nNGN 4,867.08\nTransaction Details\nReference\nREDACTED\nDate\n11th Sep, 2026\nBank\nOPay Digital Services Limited (OPay)\nAccount\nACCOUNT\nGlovo_Nigeria\nuser@example.com\n© Paystack Inc 2026\nModern Payments for Africa"
+    },
+    "expected": {
+      "kind": "none"
+    }
+  },
+  {
+    "email": {
+      "id": "fixture-15",
+      "from": "Canva <user@example.com>",
+      "subject": "Your Canva Pro trial has started",
+      "date": "2026-05-19",
+      "text": "Your Canva Pro trial starts today\nThanks for starting your trial! You get to try out premium features, free for the next 90 days until August 17, 2026.\nIf you decide to stay on Canva Pro, sign up to a monthly or yearly plan and your subscription will begin after your trial ends.\nManage subscription\nIf you've already chosen a plan, please ignore this email.\nYou're receiving this email because you have a Canva account. This email is not a marketing or promotional email. That is why this email does not contain an unsubscribe link. You will receive this email even if you have unsubscribed from Canva's marketing emails.\nMade for you with\nfrom Canva\nCanva Pty Ltd, 110 Kippax St, NSW 2010, Australia\nABN PHONE | Privacy Policy"
+    },
+    "expected": {
+      "kind": "trial_start",
+      "merchant": "Canva",
+      "date": "2026-05-19",
+      "endsAt": "2026-08-17"
+    }
+  }
+]
