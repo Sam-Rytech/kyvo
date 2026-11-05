@@ -28,9 +28,10 @@ type Props = {
   hasMemories: boolean;
   vault: { address: string | null; runway: VaultRunway | null; unavailable: boolean };
   telegram: { linked: boolean; linkUrl: string };
+  readOnly: boolean;
 };
 
-export function DashboardView({ funding, blank, hindcast, alerts, trials, promises, rate, rateSource, currency, hasMemories, vault, telegram }: Props) {
+export function DashboardView({ funding, blank, hindcast, alerts, trials, promises, rate, rateSource, currency, hasMemories, vault, telegram, readOnly }: Props) {
   const { openWhy } = useWhy();
   const [ignoreMemory, setIgnoreMemory] = useState(false);
 
@@ -113,9 +114,9 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
 
   return (
     <div className="space-y-xl">
-      <MemorySyncStatus />
+      {!readOnly && <MemorySyncStatus />}
 
-      {!telegram.linked && (
+      {!readOnly && !telegram.linked && (
         <section className="rounded-xl border border-secondary bg-primary p-lg shadow-xs flex flex-wrap items-center justify-between gap-sm" aria-label="Telegram alerts">
           <p className="text-sm text-secondary">Get warned on Telegram before a charge can fail.</p>
           <a href={telegram.linkUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand shrink-0">
@@ -126,7 +127,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
 
       <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-sm mb-xs">
-          <h1 className="text-xs uppercase font-semibold tracking-wider text-tertiary">Next funding</h1>
+          <h2 className="text-xs uppercase font-semibold tracking-wider text-tertiary">Next funding</h2>
           <label className="flex items-center gap-xs text-xs font-medium text-secondary cursor-pointer">
             <input type="checkbox" checked={ignoreMemory} onChange={(event) => setIgnoreMemory(event.target.checked)} />
             Ignore memory
@@ -159,6 +160,8 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
             </p>
           )
         )}
+
+        {rate === null && currency !== 'USD' && <p className="text-xs text-utility-warning-700 mt-xs">Exchange rates are temporarily unavailable, so amounts are in dollars only.</p>}
 
         {!ignoreMemory &&
           alerts.map((alert) => (
@@ -231,7 +234,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-        <VaultCard address={vault.address} runway={vault.runway} unavailable={vault.unavailable} rate={rate} currency={currency} />
+        <VaultCard address={vault.address} runway={vault.runway} unavailable={vault.unavailable} rate={rate} currency={currency} readOnly={readOnly} />
         {telegram.linked && <TelegramCard linked linkUrl={telegram.linkUrl} />}
         <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs" aria-labelledby="trials-title">
           <div className="flex items-center justify-between">

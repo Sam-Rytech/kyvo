@@ -12,6 +12,7 @@ import {
   CreditCard,
   LayoutDashboard,
   Moon,
+  Settings,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
@@ -32,25 +33,12 @@ const navItems = [
   { href: '/proof', label: 'Proof', icon: ShieldCheck },
 ];
 
-// Pages that show real data once signed in. Every other page stays labelled as a sample.
-const LIVE_ROUTES = new Set(['/', '/subscriptions', '/trials', '/cards', '/family', '/onboarding']);
-// Real for everyone, signed in or not.
-const ALWAYS_LIVE = new Set(['/status', '/proof']);
-
 const AUTH_ERRORS: Record<string, string> = {
   denied: 'Sign-in was cancelled.',
   state: 'Sign-in expired. Try again.',
   gmail_scope: 'Kyvo needs Gmail read access to find your subscriptions. Try again and allow it.',
   exchange: 'Google sign-in failed. Try again.',
 };
-
-function SampleBadge() {
-  return (
-    <span className="text-xs py-xxs px-xs rounded-full bg-utility-brand-50 text-utility-brand-700 border border-utility-brand-200 font-medium">
-      Sample data
-    </span>
-  );
-}
 
 type Recall = { state: 'idle' } | { state: 'running'; done: number; total: number; restored: number } | { state: 'done'; restored: number } | { state: 'error'; message: string };
 
@@ -116,7 +104,7 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
   };
 
   const ThemeIcon = isDark ? Sun : Moon;
-  const showSampleBadge = !ALWAYS_LIVE.has(pathname) && (!email || !LIVE_ROUTES.has(pathname));
+  const nav = email ? [...navItems, { href: '/settings', label: 'Settings', icon: Settings }] : navItems;
 
   return (
     <WhyProvider>
@@ -129,7 +117,6 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
                   K
                 </div>
                 <span className="font-bold text-heading-xs tracking-tight text-primary">Kyvo</span>
-                {showSampleBadge && <SampleBadge />}
               </div>
               <button
                 onClick={toggleTheme}
@@ -141,7 +128,7 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
             </div>
 
             <nav className="space-y-xxs">
-              {navItems.map((item) => {
+              {nav.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
@@ -198,7 +185,6 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
                 K
               </div>
               <span className="font-bold text-heading-xs tracking-tight text-primary">Kyvo</span>
-              {showSampleBadge && <SampleBadge />}
             </div>
             <div className="flex items-center gap-xs shrink-0">
               {email ? (
@@ -227,6 +213,12 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
             </div>
           </header>
 
+          {!email && (
+            <div className="bg-utility-brand-50 border-b border-utility-brand-200 px-lg py-xs text-xs text-utility-brand-700">
+              <strong className="font-semibold">Demo:</strong> real billing history, read-only. Connecting your own Gmail is limited to approved testers while Kyvo is in Google&apos;s testing mode.
+            </div>
+          )}
+
           {authError && (
             <div role="alert" className="bg-utility-error-50 border-b border-utility-error-200 px-lg py-xs text-sm text-utility-error-700">
               {authError}
@@ -236,7 +228,7 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
           <main className="flex-1 p-lg md:p-2xl max-w-6xl w-full mx-auto pb-24 md:pb-12">{children}</main>
 
           <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-primary border-t border-secondary z-30 flex overflow-x-auto">
-            {navItems.map((item) => {
+            {nav.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (

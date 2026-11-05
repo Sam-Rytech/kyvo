@@ -13,7 +13,7 @@ async function post(path: string, body: unknown) {
 
 const FAILED = "That didn't save. Check your connection and try again.";
 
-function TrialCard({ trial, onSaved }: { trial: TrialState; onSaved: () => void }) {
+function TrialCard({ trial, onSaved, readOnly }: { trial: TrialState; onSaved: () => void; readOnly: boolean }) {
   const [date, setDate] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
@@ -39,7 +39,7 @@ function TrialCard({ trial, onSaved }: { trial: TrialState; onSaved: () => void 
         {trial.convertsTo ? `, then ${usd(trial.convertsTo)}` : ''}
       </p>
       {trial.reason && <p className="text-xs text-secondary italic">Why you started it: {trial.reason}</p>}
-      {trial.status === 'unknown' && status !== 'saved' && (
+      {!readOnly && trial.status === 'unknown' && status !== 'saved' && (
         <div className="flex flex-wrap items-end gap-xs pt-xs">
           <label className="text-xs font-medium text-secondary">
             When does it end?
@@ -56,7 +56,7 @@ function TrialCard({ trial, onSaved }: { trial: TrialState; onSaved: () => void 
   );
 }
 
-export function TrialsView({ trials, promises }: { trials: TrialState[]; promises: PromiseState[] }) {
+export function TrialsView({ trials, promises, readOnly }: { trials: TrialState[]; promises: PromiseState[]; readOnly: boolean }) {
   const { open, sync } = useMemorySync();
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +81,7 @@ export function TrialsView({ trials, promises }: { trials: TrialState[]; promise
 
   return (
     <div className="space-y-xl">
-      <MemorySyncStatus />
+      {!readOnly && <MemorySyncStatus />}
       <div>
         <h1 className="text-heading-xs font-semibold text-primary">Trials and promises</h1>
         <p className="text-xs text-tertiary">Found in your billing emails, or things you told Kyvo.</p>
@@ -100,7 +100,8 @@ export function TrialsView({ trials, promises }: { trials: TrialState[]; promise
                 {promise.text}
                 {promise.status === 'open' && <span className="block text-xs text-tertiary">{promise.ageDays === 0 ? 'Today' : `${promise.ageDays} days ago`}</span>}
               </span>
-              {promise.status === 'open' &&
+              {!readOnly &&
+                promise.status === 'open' &&
                 (saved.includes(promise.id) ? (
                   <span className="text-xs text-tertiary shrink-0">Saving…</span>
                 ) : (
@@ -116,7 +117,7 @@ export function TrialsView({ trials, promises }: { trials: TrialState[]; promise
             </li>
           ))}
         </ul>
-        <form
+        {!readOnly && <form
           onSubmit={(event) => {
             event.preventDefault();
             void addPromise();
@@ -130,7 +131,7 @@ export function TrialsView({ trials, promises }: { trials: TrialState[]; promise
           <button disabled={text.trim().length < 3} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50 shrink-0">
             Add
           </button>
-        </form>
+        </form>}
         {error && <p className="text-xs text-utility-error-700">{error}</p>}
       </section>
 
@@ -143,7 +144,7 @@ export function TrialsView({ trials, promises }: { trials: TrialState[]; promise
         ) : (
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-md">
             {trials.map((trial) => (
-              <TrialCard key={trial.slug} trial={trial} onSaved={() => void sync()} />
+              <TrialCard key={trial.slug} trial={trial} onSaved={() => void sync()} readOnly={readOnly} />
             ))}
           </ul>
         )}

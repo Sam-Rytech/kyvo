@@ -14,7 +14,7 @@ async function saveCard(body: unknown) {
 
 function ProviderFacts({ provider }: { provider: string }) {
   const rule = getProviderRule(provider);
-  if (!rule) return null;
+  if (!rule) return <p className="text-xs text-tertiary">Kyvo doesn&apos;t have rules for {provider} yet, so it doesn&apos;t state any fees.</p>;
   const facts = [
     rule.declineFee ? `Decline fee: ${rule.declineFee.currency === 'USD' ? usd(rule.declineFee.amount) : `${rule.declineFee.currency} ${rule.declineFee.amount}`}.` : null,
     rule.txnFee ? `Per payment: ${usd(rule.txnFee.flatUsd ?? 0)}.` : null,
@@ -38,7 +38,7 @@ function ProviderFacts({ provider }: { provider: string }) {
   );
 }
 
-function CardRow({ card, onSaved }: { card: CardState; onSaved: () => void }) {
+function CardRow({ card, onSaved, readOnly }: { card: CardState; onSaved: () => void; readOnly: boolean }) {
   const { openWhy } = useWhy();
   const [provider, setProvider] = useState(card.provider ?? '');
   const [balance, setBalance] = useState('');
@@ -93,17 +93,15 @@ function CardRow({ card, onSaved }: { card: CardState; onSaved: () => void }) {
 
       {card.provider && <ProviderFacts provider={card.provider} />}
 
-      <div className="flex flex-wrap items-end gap-xs border-t border-secondary pt-md">
+      {!readOnly && <div className="flex flex-wrap items-end gap-xs border-t border-secondary pt-md">
         <label className="text-xs font-medium text-secondary">
           Issued by
-          <select value={provider} onChange={(event) => setProvider(event.target.value)} className="block mt-xxs rounded-lg border border-secondary bg-primary px-sm py-xs text-sm text-primary">
-            <option value="">Choose…</option>
+          <input list="known-providers" value={provider} onChange={(event) => setProvider(event.target.value)} maxLength={40} placeholder="Type or choose" className="block mt-xxs w-40 rounded-lg border border-secondary bg-primary px-sm py-xs text-sm text-primary placeholder:text-placeholder" />
+          <datalist id="known-providers">
             {PROVIDERS.map((p) => (
-              <option key={p.id} value={p.name}>
-                {p.name}
-              </option>
+              <option key={p.id} value={p.name} />
             ))}
-          </select>
+          </datalist>
         </label>
         <label className="text-xs font-medium text-secondary">
           Balance now, in dollars
@@ -114,28 +112,28 @@ function CardRow({ card, onSaved }: { card: CardState; onSaved: () => void }) {
         </button>
         {status === 'saved' && <span className="text-xs text-secondary">Saved. Updating from Walrus Memory…</span>}
         {status === 'error' && <span className="text-xs text-utility-error-700">That didn&apos;t save. Try again.</span>}
-      </div>
+      </div>}
     </li>
   );
 }
 
-export function CardsView({ cards }: { cards: CardState[] }) {
+export function CardsView({ cards, readOnly }: { cards: CardState[]; readOnly: boolean }) {
   const { open, sync } = useMemorySync();
   const total = cards.reduce((sum, card) => sum + card.holders.length, 0);
 
   return (
     <div className="space-y-lg">
-      <MemorySyncStatus />
+      {!readOnly && <MemorySyncStatus />}
       <div>
         <h1 className="text-heading-xs font-semibold text-primary">Cards</h1>
         <p className="text-xs text-tertiary">
-          {cards.length === 0 ? 'No cards found in your emails yet.' : `${total} ${total === 1 ? 'service holds' : 'services hold'} your cards. Card providers have no API, so the provider and balance come from you.`}
+          {cards.length === 0 ? 'No cards found in your emails yet.' : `${total} ${total === 1 ? 'service holds' : 'services hold'} your cards. Card providers have no API, so the provider and balance are entered by hand.`}
         </p>
       </div>
       {open > 0 && <p className="text-xs text-tertiary">Saving to Walrus Memory…</p>}
       <ul className="space-y-md">
         {cards.map((card) => (
-          <CardRow key={card.card} card={card} onSaved={() => void sync()} />
+          <CardRow key={card.card} card={card} onSaved={() => void sync()} readOnly={readOnly} />
         ))}
       </ul>
     </div>

@@ -60,7 +60,7 @@ export function cardStates(events: CachedEvent[], asOf: string): CardState[] {
       if (!HOLDING_TYPES.has(e.type) || !e.eventDate) continue;
       holders.set(e.merchant, {
         slug: e.merchant,
-        name: str(e.event.name) ?? holders.get(e.merchant)?.name ?? e.merchant,
+        name: str(e.event.name) ?? holders.get(e.merchant)?.name ?? e.merchant.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         lastSeen: e.eventDate,
         stale: diffDays(asOf, e.eventDate) > STALE_AFTER_DAYS,
         blobIds: [...(holders.get(e.merchant)?.blobIds ?? []), e.blobId],

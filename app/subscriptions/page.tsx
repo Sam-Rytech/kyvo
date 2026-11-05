@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { AlertTriangle } from 'lucide-react';
 import { ScanPanel } from '@/components/scan-panel';
-import { SampleSubscriptions } from '@/components/sample-subscriptions';
 import { createDb } from '@/db';
 import { cacheEvents, users } from '@/db/schema';
-import { getSession } from '@/lib/auth/session';
+import { getViewer } from '@/lib/viewer';
 import { getTatum } from '@/lib/chain/tatum-client';
 import { deriveSubscriptions, type SubscriptionView } from '@/lib/engines/subscriptions';
+import { approxLocal, shortDate } from '@/lib/format';
 import { getUsdcRate, type Rate } from '@/lib/fx/tatum-rates';
 
 const shortBlob = (id: string) => `${id.slice(0, 8)}…${id.slice(-4)}`;
@@ -46,13 +46,13 @@ function SubscriptionRow({ sub, rate }: { sub: SubscriptionView; rate: Rate | nu
             {sub.refundCount > 0 && <Badge tone="gray">{sub.refundCount === 1 ? '1 refund' : `${sub.refundCount} refunds`}</Badge>}
           </div>
           <p className="text-xs text-tertiary">
-            {sub.lastDate ? `Last charged ${sub.lastDate}` : 'No successful charge yet'}
+            {sub.lastDate ? `Last charged ${shortDate(sub.lastDate)}` : 'No successful charge yet'}
             {sub.card ? ` • card ${sub.card}` : ''}
           </p>
         </div>
         <div className="text-right shrink-0">
           <div className="text-heading-xs font-mono font-bold text-primary">{money(sub.lastAmount, sub.currency)}</div>
-          {local !== null && <div className="text-xs font-mono text-tertiary">≈ {rate?.base} {Math.round(local).toLocaleString()}</div>}
+          {local !== null && <div className="text-xs font-mono text-tertiary">{approxLocal(local, 1, rate?.base ?? '')}</div>}
         </div>
       </div>
 
@@ -76,13 +76,12 @@ function SubscriptionRow({ sub, rate }: { sub: SubscriptionView; rate: Rate | nu
 }
 
 export default async function SubscriptionsPage() {
-  const session = await getSession();
-  if (!session) return <SampleSubscriptions />;
+  const viewer = await getViewer();
 
   const db = createDb();
   const [events, [user]] = await Promise.all([
-    db.select().from(cacheEvents).where(eq(cacheEvents.userId, session.userId)),
-    db.select().from(users).where(eq(users.id, session.userId)),
+    db.select().from(cacheEvents).where(eq(cacheEvents.userId, viewer.userId)),
+    db.select().from(users).where(eq(users.id, viewer.userId)),
   ]);
   const subscriptions = deriveSubscriptions(events, user?.homeCurrency);
 
@@ -104,7 +103,7 @@ export default async function SubscriptionsPage() {
         <p className="text-xs text-tertiary">Learned from your billing emails. Every record is stored on Walrus Memory.</p>
       </div>
 
-      <ScanPanel />
+      {!viewer.readOnly && <ScanPanel />}
 
       {rateFailed && (
         <p className="flex items-center gap-xs text-xs text-utility-warning-700">
@@ -116,7 +115,7 @@ export default async function SubscriptionsPage() {
       {subscriptions.length === 0 ? (
         <div className="rounded-xl border border-secondary bg-primary p-2xl text-center shadow-xs">
           <h2 className="text-heading-xs font-semibold text-primary">Nothing here yet</h2>
-          <p className="text-sm text-secondary mt-xs">Run a scan, and your dollar subscriptions will show up here on their own.</p>
+          <p className="text-sm text-secondary mt-xs">Your dollar subscriptions show up here on their own after a scan.</p>
         </div>
       ) : (
         <div className="rounded-xl border border-secondary bg-primary shadow-xs divide-y divide-secondary">

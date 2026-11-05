@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PROVIDERS } from '@/config/providers';
 import { createDb } from '@/db';
 import { getSession } from '@/lib/auth/session';
 import { today } from '@/lib/engines/dates';
@@ -12,7 +11,7 @@ const Body = z.object({
   card: z.string().trim().regex(/^[\w .-]{1,40}$/),
   merchant: z.string().trim().min(1).max(80).optional(),
   merchantName: z.string().trim().max(80).optional(),
-  provider: z.enum(PROVIDERS.map((p) => p.name) as [string, ...string[]]).optional(),
+  provider: z.string().trim().min(1).max(40).optional(),
   balance: z.number().min(0).max(1_000_000).optional(),
   removeHolder: z.boolean().optional(),
 });

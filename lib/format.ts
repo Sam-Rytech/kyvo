@@ -1,4 +1,4 @@
-const SYMBOLS: Record<string, string> = { NGN: '₦', GHS: 'GH₵', KES: 'KSh ', EGP: 'E£', USD: '$' };
+const SYMBOLS: Record<string, string> = { NGN: '₦', GHS: 'GH₵', KES: 'KSh ', EGP: 'E£', ZAR: 'R', UGX: 'USh ', INR: '₹', USD: '$' };
 
 export const usd = (amount: number) => `$${amount.toFixed(2)}`;
 

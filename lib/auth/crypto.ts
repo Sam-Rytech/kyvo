@@ -47,6 +47,22 @@ export function webhookSecret(root: string): string {
   return createHmac('sha256', subkey(root, 'telegram-webhook')).update('webhook').digest('hex');
 }
 
+/** A public link to one month's totals. The month and owner are signed, so neither can be swapped. */
+export function makeShareCode(userId: string, month: string, root: string): string {
+  const payload = `${userId}_${month}`;
+  return `${payload}_${createHmac('sha256', subkey(root, 'wrapped-share')).update(payload).digest().subarray(0, 16).toString('base64url')}`;
+}
+
+export function readShareCode(code: string, root: string): { userId: string; month: string } | null {
+  const [userId, month, ...rest] = code.split('_');
+  const signature = rest.join('_');
+  if (!userId || !month || !signature) return null;
+  const expected = createHmac('sha256', subkey(root, 'wrapped-share')).update(`${userId}_${month}`).digest().subarray(0, 16);
+  const given = Buffer.from(signature, 'base64url');
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
+  return { userId, month };
+}
+
 export type SessionData = { userId: string; email: string; exp: number };
 
 export function signSession(data: SessionData, root: string): string {

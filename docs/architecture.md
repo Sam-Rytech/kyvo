@@ -33,7 +33,7 @@ People outside the US pay for Netflix, Spotify, ChatGPT, Canva, AWS and similar 
 | **FX timing** | "Your rate moved 3.1% this week" | Remembers the rate you usually fund at |
 | **Dollar vault (Sui)** | USDC balance and months of runway | Remembers your monthly burn |
 | **Family-plan split** | "Tunde owes $4.50 for Netflix; paid 2 days late last time" | Remembers who pays, and how late, per member |
-| **Dollar Wrapped** | A monthly shareable report | Its headline number is forecast accuracy over time |
+| **Dollar Wrapped** | A monthly shareable report | Its headline number is forecast accuracy over time. Share links are signed for one user and month, and show totals only, never merchants |
 | **Total Recall button** | Wipe the cache and rebuild everything from Walrus | Proves Walrus is the source of truth |
 
 ## 3. System overview
@@ -246,6 +246,7 @@ USDC coin type on Sui mainnet: `0xdba34672e30cb065b1f93e3ab55318768fd6fef66c1594
 - **Raw emails** are never stored or logged. Only extracted facts are kept.
 - **LLM provider:** billing email text is sent to Groq for extraction. Groq says it doesn't retain inference data by default, but may log inputs and outputs for up to 30 days when troubleshooting failures or investigating abuse. Its data page doesn't state a training policy, so don't claim one. Turn on Zero Data Retention in the Groq console, and tell test users about this. Don't use the free Gemini tier: its terms say not to submit personal information and that human reviewers may read content.
 - **Namespaces** are derived server-side from the authenticated user. They're never taken from the request.
+- **Demo account:** signed-out visitors see a read-only demo account (`lib/viewer.ts`), real data seeded from the owner's billing history, with forms hidden. Every write route still requires a session, so the demo can't be changed. Sample data is gone: nothing in the app is made up.
 - **Disclosure:** in the multi-tenant pattern, the operator account owns users' memories, as the Walrus docs state. Say so in the README and blog. Future work: a user-owned account with Kyvo as a revocable delegate.
 - **The MEMWAL owner key** never touches the server.
 - **Memory content:** blobs on public Walrus are SEAL-encrypted. `scripts/probe-memwal.ts` confirmed it on mainnet by downloading its own blob from a public aggregator (354 bytes, test text not readable). The relayer does handle plaintext to embed and to return recall results, so it's trusted with content. The README must say so.
@@ -256,7 +257,7 @@ A read-only MCP endpoint `/api/mcp` with per-user tokens (`kyvo_upcoming`, `kyvo
 ## 11. Repository layout
 ```
 kyvo/
-  app/                    Next.js routes: dashboard, subscriptions, trials, cards, family, wrapped, status, proof
+  app/                    Next.js routes: dashboard, subscriptions, trials, cards, family, wrapped, settings, status, proof
   app/api/                auth, scan, outbox/drain, cron, telegram, chain, fx, rebuild
   components/             app shell, "Why?" panel
   design-tokens/          CSS variables and Tailwind tokens from the AI Builder export

@@ -14,7 +14,7 @@ const BADGES: Record<MemberState['status'], string> = {
 
 const statusLabel = (member: MemberState) => (member.status === 'paid' ? 'Paid' : member.status === 'late' ? `${member.daysLate} ${member.daysLate === 1 ? 'day' : 'days'} late` : `Due ${shortDate(member.due)}`);
 
-function MemberRow({ member }: { member: MemberState }) {
+function MemberRow({ member, readOnly }: { member: MemberState; readOnly: boolean }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -45,7 +45,7 @@ function MemberRow({ member }: { member: MemberState }) {
           </>
         )}
       </p>
-      {member.reminder && (
+      {!readOnly && member.reminder && (
         <button onClick={() => void copy()} className="inline-flex items-center gap-xxs text-xs font-semibold text-brand-primary hover:underline">
           {copied ? <Check className="w-3 h-3" aria-hidden /> : <Copy className="w-3 h-3" aria-hidden />}
           {copied ? 'Copied' : 'Copy a reminder to send'}
@@ -139,7 +139,7 @@ function NewPlan({ onCreated }: { onCreated: () => void }) {
 
 const REASONS = { amount: 'the amount differs from their share by more than 1%', early: "there's nothing due yet for it to count towards" };
 
-export function FamilyView({ plans, vault }: { plans: PlanState[]; vault: string | null }) {
+export function FamilyView({ plans, vault, readOnly }: { plans: PlanState[]; vault: string | null; readOnly: boolean }) {
   const { sync } = useMemorySync();
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -164,15 +164,15 @@ export function FamilyView({ plans, vault }: { plans: PlanState[]; vault: string
 
   return (
     <div className="space-y-lg">
-      <MemorySyncStatus />
+      {!readOnly && <MemorySyncStatus />}
       <div>
         <h1 className="text-heading-xs font-semibold text-primary">Family plans</h1>
         <p className="text-xs text-tertiary">Members pay your vault in USDC on Sui. Kyvo confirms each payment on-chain through Tatum, and remembers who pays late.</p>
       </div>
 
-      {!vault && <p className="rounded-lg border border-utility-warning-200 bg-utility-warning-50 p-md text-sm text-utility-warning-700">Add your vault address on the dashboard first, so Kyvo knows where members&apos; payments arrive.</p>}
+      {!readOnly && !vault && <p className="rounded-lg border border-utility-warning-200 bg-utility-warning-50 p-md text-sm text-utility-warning-700">Add your vault address on the dashboard first, so Kyvo knows where members&apos; payments arrive.</p>}
 
-      {plans.length > 0 && (
+      {!readOnly && plans.length > 0 && (
         <div className="flex flex-wrap items-center gap-sm">
           <button onClick={() => void check()} disabled={checking || !vault} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
             {checking ? 'Checking Sui…' : 'Check for payments'}
@@ -205,18 +205,18 @@ export function FamilyView({ plans, vault }: { plans: PlanState[]; vault: string
           <p className="text-xs text-tertiary">Due monthly, from {shortDate(plan.firstDue)}</p>
           <ul className="divide-y divide-secondary mt-xs">
             {plan.members.map((member) => (
-              <MemberRow key={member.id} member={member} />
+              <MemberRow key={member.id} member={member} readOnly={readOnly} />
             ))}
           </ul>
         </section>
       ))}
 
-      <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm" aria-labelledby="new-plan">
+      {!readOnly && <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm" aria-labelledby="new-plan">
         <h2 id="new-plan" className="text-sm font-semibold text-primary">
           {plans.length ? 'Add another plan' : 'Create your first plan'}
         </h2>
         <NewPlan onCreated={() => void sync()} />
-      </section>
+      </section>}
     </div>
   );
 }

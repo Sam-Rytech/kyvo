@@ -71,11 +71,11 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 5 (Mon Nov 9): polish and the shareable part
-- [ ] Dollar Wrapped monthly report page (shareable image and link)
-- [ ] Currency picker (NGN, GHS, KES, EGP, USD) to show global scope. Add a settings link so anyone can change their currency and cards later, and let people name a provider that isn't listed
-- [ ] Error, empty and loading states; mobile layout; a demo account seeded from your real data
-- [ ] Get 2–3 friends to connect Gmail (real usage evidence for the blog)
-- [ ] README: setup, architecture link, provider-fee sources, honest limits
+- [x] Dollar Wrapped monthly report page (shareable image and link). Accuracy is computed from the same replay as the chart; shared versions show totals only
+- [x] Currency picker (NGN, GHS, KES, EGP, ZAR, UGX, INR, USD; each confirmed to return a Tatum rate). Settings page to change currency and cards later, and people can name a provider that isn't listed
+- [~] Error, empty and loading states; mobile layout, checked at phone width; a demo account seeded from your real data. Built and checked locally. **Owner review needed before it goes live, because strangers will see it**
+- [~] Get 2–3 friends to connect Gmail (real usage evidence for the blog). One friend added as a Google test user; not connected yet
+- [x] README: setup, architecture link, provider-fee sources, honest limits. `docs/DEMO.md` and `docs/BLOG.md` drafted
 - [ ] Stretch, only if all gates are green: read-only MCP endpoint
 
 **Gate 5:** a stranger can open the live URL, use the demo account, and understand the product in 30 seconds. The repo has no secrets (run a secret scan).
@@ -123,3 +123,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Day 4 built: vault, family payments, Telegram, daily cron, /status, /proof. 207 tests pass. Found the Tatum gateway now refuses address queries with no starting checkpoint, and `@mysten/dapp-kit` is deprecated: both handled and documented. **Gate 4 not passed yet.** | Owner: link Telegram; fund the wallet for the real payment |
 | Nov 5 | Telegram linked after fixing links whose signature contained an underscore. Live cron delivered a digest; a repeat run skipped it. Only the real USDC payment remains for Gate 4. | Owner's wallet funds |
 | Nov 5 | Real 0.01 USDC payment verified on Sui mainnet through Tatum, shown as paid, with a memory on Walrus. **Gate 4 passed. Day 4 complete.** | Naira amount for the funding markup; Discord question open |
+| Nov 5 | Day 5 built: Wrapped with share link and image, read-only demo account replacing all sample data, landing explanation, settings, custom providers, 8 currencies, not-found page, README, demo script and blog draft. 221 tests pass; production build checked at desktop and phone width. Secret scan over full history clean. One friend added as a Google test user. **Gate 5 not passed yet:** the demo isn't live until the owner reviews it. | Owner review of demo data; naira amount for the funding markup; Discord question open |

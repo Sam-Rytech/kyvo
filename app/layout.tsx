@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth/session';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://kyvo-five.vercel.app'),
   title: 'Kyvo',
   description: 'Never get declined again. Know what to fund, in your own currency, before the charge hits.',
 };

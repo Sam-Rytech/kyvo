@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { CURRENCIES, PROVIDERS } from '@/config/providers';
+import { CURRENCIES } from '@/config/providers';
 import { createDb } from '@/db';
 import { users } from '@/db/schema';
 import { getSession } from '@/lib/auth/session';
@@ -9,11 +9,9 @@ import { encodeEnvelope } from '@/lib/memory/envelope';
 import { eventKey, namespaces } from '@/lib/memory/namespaces';
 import { enqueue } from '@/lib/memory/store';
 
-const providerNames = PROVIDERS.map((p) => p.name) as [string, ...string[]];
-
 const Body = z.object({
   homeCurrency: z.enum(CURRENCIES),
-  providers: z.array(z.enum(providerNames)).min(1),
+  providers: z.array(z.string().trim().min(1).max(40)).min(1).max(12),
 });
 
 export async function POST(request: Request) {

@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { DashboardView } from '@/components/dashboard-view';
-import { SampleDashboard } from '@/components/sample-dashboard';
+import { Landing } from '@/components/landing';
 import { createDb } from '@/db';
 import { cacheEvents, users } from '@/db/schema';
-import { getSession } from '@/lib/auth/session';
+import { getViewer } from '@/lib/viewer';
 import { getTatum } from '@/lib/chain/tatum-client';
 import { today } from '@/lib/engines/dates';
 import { guardAlerts } from '@/lib/engines/decline-guard';
@@ -18,13 +18,11 @@ import { vaultRunway, type VaultRunway } from '@/lib/engines/vault';
 import { getUsdcRate, type Rate } from '@/lib/fx/tatum-rates';
 
 export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) return <SampleDashboard />;
-
+  const viewer = await getViewer();
   const db = createDb();
   const [events, [user]] = await Promise.all([
-    db.select().from(cacheEvents).where(eq(cacheEvents.userId, session.userId)),
-    db.select().from(users).where(eq(users.id, session.userId)),
+    db.select().from(cacheEvents).where(eq(cacheEvents.userId, viewer.userId)),
+    db.select().from(users).where(eq(users.id, viewer.userId)),
   ]);
   const currency = user?.homeCurrency ?? 'NGN';
   const asOf = today();
@@ -48,12 +46,15 @@ export default async function DashboardPage() {
     }
   }
   const bot = process.env.TELEGRAM_BOT_USERNAME ?? 'Kyvoalert_bot';
-  const telegramLink = `https://t.me/${bot}?start=${makeLinkCode(session.userId, process.env.TOKEN_ENC_KEY as string)}`;
+  const telegramLink = `https://t.me/${bot}?start=${makeLinkCode(viewer.userId, process.env.TOKEN_ENC_KEY as string)}`;
 
   return (
+    <>
+    {viewer.readOnly && <div className="mb-xl"><Landing /></div>}
     <DashboardView
       vault={{ address: user?.vaultAddress ?? null, runway, unavailable: vaultUnavailable }}
       telegram={{ linked: Boolean(user?.telegramChatId), linkUrl: telegramLink }}
+      readOnly={viewer.readOnly}
       funding={buildFunding(events, currency, asOf)}
       blank={blankForecasts(merchantHistories(events, currency), asOf)}
       hindcast={buildHindcast(events, currency, asOf)}
@@ -65,5 +66,6 @@ export default async function DashboardPage() {
       currency={currency}
       hasMemories={events.length > 0}
     />
+    </>
   );
 }

@@ -109,7 +109,8 @@ export const PROVIDERS: ProviderRule[] = [
   },
 ];
 
-export const CURRENCIES = ['NGN', 'GHS', 'KES', 'EGP', 'USD'] as const;
+// Each confirmed to return a rate from Tatum on Nov 5, 2026.
+export const CURRENCIES = ['NGN', 'GHS', 'KES', 'EGP', 'ZAR', 'UGX', 'INR', 'USD'] as const;
 
 /** Only rates seen on a real receipt. Nigeria's 7.5% VAT was added to Claude Pro in October 2026. */
 export const VAT_RATES: Record<string, number> = { NGN: 0.075 };

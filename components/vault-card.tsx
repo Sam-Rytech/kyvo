@@ -17,9 +17,10 @@ type Props = {
   unavailable: boolean;
   rate: number | null;
   currency: string;
+  readOnly: boolean;
 };
 
-export function VaultCard({ address, runway, unavailable, rate, currency }: Props) {
+export function VaultCard({ address, runway, unavailable, rate, currency, readOnly }: Props) {
   const { openWhy } = useWhy();
   const { sync } = useMemorySync();
   const [pasted, setPasted] = useState('');
@@ -78,15 +79,19 @@ export function VaultCard({ address, runway, unavailable, rate, currency }: Prop
             <a href={`https://suiscan.xyz/mainnet/account/${address}`} target="_blank" rel="noreferrer" className="font-mono underline">
               {address.slice(0, 8)}…{address.slice(-6)}
             </a>
-            {' · '}
-            <button onClick={() => setChanging((open) => !open)} className="underline">
-              Change
-            </button>
+            {!readOnly && (
+              <>
+                {' · '}
+                <button onClick={() => setChanging((open) => !open)} className="underline">
+                  Change
+                </button>
+              </>
+            )}
           </p>
         </>
       )}
 
-      {(!address || changing) && (
+      {!readOnly && (!address || changing) && (
         <div className="space-y-xs">
           <p className="text-xs text-tertiary">Kyvo only reads your vault. It can&apos;t move your money, and it never asks for your seed phrase.</p>
           <WalletPicker onAddress={(value) => void save(value)} saving={saving} />

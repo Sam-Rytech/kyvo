@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { HelpCircle, X } from 'lucide-react';
-import { SAMPLE_DATA } from '@/lib/placeholder';
 
 export type WhyRecord = { sentence: string; blobId: string };
 
@@ -16,10 +15,8 @@ export type WhyContent = {
 };
 
 type WhyContextValue = {
-  /** The real panel: every number traced to records on Walrus */
+  /** Every number traced to records on Walrus */
   openWhy: (content: WhyContent) => void;
-  /** Sample pages only */
-  openWhyModal: (subject: string) => void;
 };
 
 const WhyContext = createContext<WhyContextValue | null>(null);
@@ -32,25 +29,9 @@ export function useWhy() {
 
 const shortBlob = (id: string) => `${id.slice(0, 8)}…${id.slice(-4)}`;
 
-function sampleContent(subject: string): WhyContent {
-  const b = SAMPLE_DATA.whyBreakdowns.default;
-  return {
-    title: subject,
-    summary: b.confidence,
-    rows: [
-      { label: 'Charges due', value: `$${b.baseCharge.toFixed(2)}` },
-      { label: 'Card fees', value: `+$${b.crossBorderBuffer.toFixed(2)}` },
-      { label: 'Safety buffer', value: `+$${b.vatBuffer.toFixed(2)}` },
-      { label: 'Amount to fund', value: `$${b.targetAmountUsd.toFixed(2)}`, total: true },
-    ],
-    notes: [`≈ ₦${b.targetAmountLocal.toLocaleString()} at ${b.exchangeRateUsed} NGN per USD. Sample data.`],
-    records: [],
-  };
-}
-
 export function WhyProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<WhyContent | null>(null);
-  const value = useMemo(() => ({ openWhy: setContent, openWhyModal: (subject: string) => setContent(sampleContent(subject)) }), []);
+  const value = useMemo(() => ({ openWhy: setContent }), []);
 
   useEffect(() => {
     if (!content) return;
