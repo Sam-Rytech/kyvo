@@ -50,6 +50,7 @@ describe('parseMessage', () => {
   ];
 
   it('prefers plain text and never reads attachments', () => {
+    const plainBody = 'Receipt from Acme. Amount paid $20.00 on October 18.';
     const message = parseMessage({
       id: 'm1',
       internalDate: String(Date.UTC(2026, 9, 18)),
@@ -59,11 +60,32 @@ describe('parseMessage', () => {
         parts: [
           { mimeType: 'application/pdf', filename: 'receipt.pdf', body: { data: b64('PDFDATA') } },
           { mimeType: 'text/html', body: { data: b64('<b>html body</b>') } },
-          { mimeType: 'text/plain', body: { data: b64('plain body') } },
+          { mimeType: 'text/plain', body: { data: b64(plainBody) } },
         ],
       },
     });
-    expect(message).toEqual({ id: 'm1', from: headers[0].value, subject: 'Your receipt', date: '2026-10-18', text: 'plain body' });
+    expect(message).toEqual({ id: 'm1', from: headers[0].value, subject: 'Your receipt', date: '2026-10-18', text: plainBody });
+  });
+
+  it('reads the HTML when the plain part is only a stub, as Paystack sends', () => {
+    const message = parseMessage({
+      id: 'm3',
+      internalDate: '0',
+      payload: {
+        headers,
+        mimeType: 'multipart/alternative',
+        parts: [
+          { mimeType: 'text/plain', body: { data: b64('none') } },
+          { mimeType: 'text/html', body: { data: b64('<p>You paid $5.00 to Acme</p>') } },
+        ],
+      },
+    });
+    expect(message.text).toBe('You paid $5.00 to Acme');
+  });
+
+  it('keeps a short plain part when there is no HTML', () => {
+    const message = parseMessage({ id: 'm4', internalDate: '0', payload: { headers, mimeType: 'text/plain', body: { data: b64('Paid $5') } } });
+    expect(message.text).toBe('Paid $5');
   });
 
   it('falls back to HTML', () => {

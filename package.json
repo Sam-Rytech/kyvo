@@ -14,7 +14,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
     "probe:memwal": "node --env-file=.env.local --import tsx scripts/probe-memwal.ts",
-    "probe:tatum": "node --env-file=.env.local --import tsx scripts/probe-tatum.ts"
+    "probe:tatum": "node --env-file=.env.local --import tsx scripts/probe-tatum.ts",
+    "eval:extractor": "node --env-file=.env.local --import tsx scripts/eval-extractor.ts",
+    "export:fixtures": "node --env-file=.env.local --import tsx scripts/export-fixtures.ts"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.76",

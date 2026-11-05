@@ -36,13 +36,13 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 2 (Fri Nov 6): inbox to memory
-- [~] Google OAuth sign-in; encrypted refresh-token storage. Built and unit-tested, not yet used against real Google
-- [~] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill. Built and unit-tested, not yet run on real mail
-- [~] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails. Works against real Groq on synthetic emails; the 15 real emails are still to do
+- [x] Google OAuth sign-in; encrypted refresh-token storage
+- [x] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill. 91 real emails read, 23 memories stored
+- [~] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails. All 15 extract correctly; waiting on the owner's review before the redacted emails are committed
 - [-] Forwarding fallback endpoint: moved to the top of the cut order; build only if Gmail OAuth fails
-- [~] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button. Built and unit-tested, not yet run live
+- [x] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button
 
-**Gate 2:** connecting your own Gmail populates the subscriptions list automatically, and every item has a blob ID. Wiping the database and pressing Total Recall restores the same list.
+**Gate 2:** connecting your own Gmail populates the subscriptions list automatically, and every item has a blob ID. Wiping the database and pressing Total Recall restores the same list. **Passed Nov 5:** after wiping the cache, outbox and dedupe rows, the real button restored 23 records, with events and list byte-identical to a snapshot. A repeat scan wrote no duplicates.
 
 ---
 
@@ -115,3 +115,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Neon, Google Cloud, Telegram and Groq set up. LLM switched to Groq to keep costs at zero. **Gate 0 passed.** Day 1 started. | Vault wallet has 0 USDC and 0 SUI; needs funds before Day 4. Discord question on the Agent Payments prize still open |
 | Nov 5 | Day 1: AI Builder export merged and tagged, UI ported to Next.js and live at kyvo-five.vercel.app. Probes pass on mainnet; drainer tested live; 28 unit tests pass. Gate 1 not passed yet: 12 real memories still to seed. | Owner's real subscription details for the seed |
 | Nov 5 | 15 real memories seeded from the owner's Gmail receipts, including 2 real Claude Pro declines. Real data exposed a missing `refund` event kind, now added. **Gate 1 passed.** | Vault wallet still empty; Discord question open |
+| Nov 5 | Day 2: first real Gmail scan, 91 emails. Real data exposed wallet alerts read as subscriptions, double-counted declines and charges, false price hikes, and senders with stub plain-text parts: all fixed. 3 naira memories remain on Walrus, hidden by the view. **Gate 2 passed.** Emails read before the stub fix aren't re-read. | Owner to confirm card providers and review the 15 fixtures |

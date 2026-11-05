@@ -112,7 +112,7 @@ flowchart LR
 ### 5.2 Inbox scan (daily cron, plus a manual "scan now" button)
 - **Gmail query:** billing mail only. Example: `newer_than:1d (subject:(receipt OR invoice OR "payment" OR "trial" OR "renew" OR "price" OR "declined" OR "card") OR from:(netflix.com OR openai.com OR spotify.com OR aws OR vercel.com OR ...))`.
 - **Dedupe:** a SHA-256 hash of the Gmail message ID, stored in Postgres. The raw email body is never stored or logged.
-- **Extraction:** the LLM returns one typed event per email, validated by Zod. Discard the event if the model's confidence is below 0.6. Groq's strict mode needs every field in `required` and `additionalProperties: false`, so optional fields in the extraction schema are nullable rather than omitted. Trim each email to its billing text before sending it, and let the resumable scan (§5.1) pause when the daily token limit is reached.
+- **Extraction:** the LLM returns one typed event per email, validated by Zod. Discard the event if the model's confidence is below 0.6. Bills in the user's home currency are also discarded before they reach permanent memory: Kyvo tracks foreign-currency bills, and real scans showed wallet alerts (OPay and similar) otherwise reading as subscriptions. Groq's strict mode needs every field in `required` and `additionalProperties: false`, so optional fields in the extraction schema are nullable rather than omitted. Trim each email to its billing text before sending it, and let the resumable scan (§5.1) pause when the daily token limit is reached.
 - **Forwarding fallback:** first in the cut order, and built only if Gmail OAuth fails. How inbound mail would arrive isn't designed yet. It would reuse the same extractor.
 
 ```ts
@@ -205,7 +205,8 @@ The cited sources are in the README. Re-verify these numbers before the demo, be
 - **Trials:** reminders 3 days and 1 day before conversion. If no end date is found, ask the user to confirm it.
 - **Registry:** `card_added` and the first `charge` per merchant mark a card as on file. `card_removed` comes from the user. "Stale" means no charge and no mention for 60 days.
 - **Usage-billed detection:** amounts vary by more than 20% between months, or the merchant is on the known list.
-- **Hikes:** the new amount differs from the last by more than 2% → a `price_change` memory plus an alert.
+- **Hikes:** a fixed-price bill rises by more than 2% → a `price_change` memory plus an alert. Usage bills and one-off purchases aren't hikes. A rise that's only tax isn't a price rise: real Claude Pro receipts went from $20.00 to $21.50 because 7.5% Nigerian VAT was added, so read subtotal and tax when the email shows them.
+- **Trial end dates:** some emails state only a length ("for 30 days"). Compute the end from the start date rather than asking the user.
 - **Promises:** natural language in the app or bot ("cancel Canva") becomes a `promise`. It's re-surfaced weekly until resolved.
 
 ### 7.5 Family-plan split (the Sui transaction role)

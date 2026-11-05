@@ -2,6 +2,7 @@ import { ReauthRequiredError } from '@/lib/auth/google';
 import { cleanEmailText, htmlToText } from './text';
 
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me';
+const MIN_PLAIN_TEXT = 40;
 
 const SUBJECT_TERMS = ['receipt', 'invoice', 'payment', 'trial', 'renew', 'renewal', 'price', 'declined', 'unsuccessful', 'refund', 'subscription', 'charged', 'billing'];
 // Repository and social notifications match "invoice" and "payment" constantly and never bill anyone.
@@ -42,14 +43,15 @@ export function parseMessage(raw: {
 }): GmailMessage {
   const header = (name: string) => raw.payload?.headers?.find((h) => h.name.toLowerCase() === name)?.value ?? '';
   const payload = raw.payload ?? {};
-  const plain = findPart(payload, 'text/plain');
-  const html = plain ? null : findPart(payload, 'text/html');
+  const plain = cleanEmailText(findPart(payload, 'text/plain') ?? '');
+  // Some senders put a stub such as "none" in the plain part and everything real in the HTML.
+  const body = plain.length >= MIN_PLAIN_TEXT ? plain : cleanEmailText(htmlToText(findPart(payload, 'text/html') ?? '')) || plain;
   return {
     id: raw.id,
     from: header('from'),
     subject: header('subject'),
     date: new Date(Number(raw.internalDate ?? 0)).toISOString().slice(0, 10),
-    text: cleanEmailText(plain ?? (html ? htmlToText(html) : '')),
+    text: body,
   };
 }
 
