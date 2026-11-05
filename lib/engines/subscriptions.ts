@@ -61,6 +61,7 @@ export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string
     const previous = paid.at(-2);
     const lastAmount = last ? num(last.event.amt) : null;
     const previousAmount = previous ? num(previous.event.amt) : null;
+    const usageBilled = sorted.some((e) => e.type === 'usage_bill');
 
     return {
       slug,
@@ -73,8 +74,9 @@ export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string
       // Several emails can describe one failed attempt, so a day counts once.
       declineCount: new Set(sorted.filter((e) => e.type === 'decline').map((e) => e.eventDate)).size,
       refundCount: sorted.filter((e) => e.type === 'refund').length,
-      usageBilled: sorted.some((e) => e.type === 'usage_bill'),
-      priceChange: lastAmount !== null && previousAmount !== null && lastAmount !== previousAmount ? { from: previousAmount, to: lastAmount } : null,
+      usageBilled,
+      // A hike is a rise of over 2% on a fixed-price bill (§7.4). Usage bills vary by nature.
+      priceChange: !usageBilled && lastAmount !== null && previousAmount !== null && lastAmount > previousAmount * 1.02 ? { from: previousAmount, to: lastAmount } : null,
       records: [...sorted].reverse().map((e) => ({
         type: e.type,
         date: e.eventDate,

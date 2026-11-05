@@ -107,6 +107,15 @@ describe('deriveSubscriptions', () => {
     expect(sub.records).toHaveLength(2);
   });
 
+  it('only calls a rise of over 2% on a fixed-price bill a price change', () => {
+    const hike = (from: number, to: number) => deriveSubscriptions([e('charge', '2026-08-18', from, 'a'), e('charge', '2026-09-18', to, 'b')])[0].priceChange;
+    expect(hike(20, 21.5)).toEqual({ from: 20, to: 21.5 });
+    expect(hike(20, 20.2)).toBeNull();
+    expect(hike(1.99, 0.99)).toBeNull();
+    const usage = deriveSubscriptions([e('charge', '2026-05-24', 2, 'a'), e('usage_bill', '2026-08-24', 4.51, 'b')])[0];
+    expect(usage.priceChange).toBeNull();
+  });
+
   it('does not treat a decline as a charge', () => {
     const [sub] = deriveSubscriptions([e('decline', '2026-09-18', 20, 'b1')]);
     expect(sub).toMatchObject({ chargeCount: 0, lastAmount: null, declineCount: 1 });
