@@ -38,7 +38,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ## Day 2 (Fri Nov 6): inbox to memory
 - [ ] Google OAuth sign-in; encrypted refresh-token storage
 - [ ] Gmail scanner: query builder, pagination, `seen_messages` dedupe, 12-month backfill
-- [ ] LLM extractor with Zod schemas for all 7 event kinds; confidence threshold; unit tests on 15 real (redacted) emails
+- [ ] LLM extractor with Zod schemas for all 8 event kinds, including `refund`; confidence threshold; unit tests on 15 real (redacted) emails
 - [-] Forwarding fallback endpoint: moved to the top of the cut order; build only if Gmail OAuth fails
 - [ ] Rebuild path: `listNamespaces` → recall → decode → cache. Wire up the **Total Recall** button
 

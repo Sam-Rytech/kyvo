@@ -1,6 +1,7 @@
-// Seeds the demo account's memories on mainnet from your real subscriptions.
+// Seeds the demo account's memories on mainnet from real billing history.
 // Data lives in scripts/seed-data.local.json, which git ignores. See seed-data.example.json.
-// Run: node --env-file=.env.local --import tsx scripts/seed-demo.ts
+// Preview without writing: node --env-file=.env.local --import tsx scripts/seed-demo.ts --dry-run
+// Write:                   node --env-file=.env.local --import tsx scripts/seed-demo.ts
 import { readFileSync } from 'node:fs';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -13,6 +14,7 @@ import { eventKey, merchantSlug, namespaces, userHash } from '@/lib/memory/names
 import { enqueue, postgresDrainStore } from '@/lib/memory/store';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const money = z.object({ date: isoDate, amount: z.number().positive(), currency: z.string().length(3).default('USD') });
 
 const SeedData = z.object({
   homeCurrency: z.string().length(3),
@@ -21,20 +23,26 @@ const SeedData = z.object({
     .array(
       z.object({
         merchant: z.string(),
-        card: z.string(),
-        charges: z.array(z.object({ date: isoDate, amount: z.number().positive(), currency: z.string().length(3).default('USD') })).min(1),
+        card: z.string().optional(),
+        charges: z.array(money).default([]),
+        declines: z.array(money).default([]),
+        usageBills: z.array(money.extend({ period: z.string().optional() })).default([]),
+        refunds: z.array(money).default([]),
+        cardAdded: z.array(money).default([]),
       }),
     )
     .min(1),
-  promise: z.object({ text: z.string(), merchant: z.string().optional(), date: isoDate }),
-  trial: z.object({
-    merchant: z.string(),
-    startedOn: isoDate,
-    endsOn: isoDate.optional(),
-    convertsTo: z.number().positive().optional(),
-    reason: z.string(),
-    card: z.string().optional(),
-  }),
+  promise: z.object({ text: z.string(), merchant: z.string().optional(), date: isoDate }).optional(),
+  trial: z
+    .object({
+      merchant: z.string(),
+      startedOn: isoDate,
+      endsOn: isoDate.optional(),
+      convertsTo: z.number().positive().optional(),
+      reason: z.string().optional(),
+      card: z.string().optional(),
+    })
+    .optional(),
 });
 
 type Item = { namespace: string; sentence: string; event: MemoryEvent; key: Parameters<typeof eventKey>[0] };
@@ -63,43 +71,65 @@ function buildItems(u: string, data: z.infer<typeof SeedData>): Item[] {
 
   for (const sub of data.subscriptions) {
     const m = merchantSlug(sub.merchant);
-    for (const charge of sub.charges) {
-      add(
-        namespaces.merchant(u, sub.merchant),
-        `${sub.merchant} charged ${charge.currency} ${charge.amount.toFixed(2)} on ${charge.date} to card "${sub.card}".`,
-        { t: 'charge', m, amt: charge.amount, cur: charge.currency, d: charge.date, card: sub.card },
-        { merchant: m, date: charge.date, amount: charge.amount },
-      );
+    const ns = namespaces.merchant(u, sub.merchant);
+    const onCard = sub.card ? ` on card "${sub.card}"` : '';
+    const entries: [EventType, z.infer<typeof money>[], (x: z.infer<typeof money>) => string][] = [
+      ['charge', sub.charges, (x) => `${sub.merchant} charged ${x.currency} ${x.amount.toFixed(2)} on ${x.date}${onCard}.`],
+      ['decline', sub.declines, (x) => `${sub.merchant} failed to charge ${x.currency} ${x.amount.toFixed(2)} on ${x.date}${onCard}.`],
+      ['usage_bill', sub.usageBills, (x) => `${sub.merchant} billed ${x.currency} ${x.amount.toFixed(2)} for usage on ${x.date}${onCard}.`],
+      ['refund', sub.refunds, (x) => `${sub.merchant} refunded ${x.currency} ${x.amount.toFixed(2)} on ${x.date}${onCard}.`],
+      ['card_added', sub.cardAdded, (x) => `${sub.merchant} put a ${x.currency} ${x.amount.toFixed(2)} authorization${onCard} on ${x.date}, so it now holds that card.`],
+    ];
+    for (const [t, list, sentence] of entries) {
+      for (const x of list) {
+        add(ns, sentence(x), { t, m, amt: x.amount, cur: x.currency, d: x.date, card: sub.card }, { merchant: m, date: x.date, amount: x.amount });
+      }
     }
   }
 
-  const promiseMerchant = data.promise.merchant ? merchantSlug(data.promise.merchant) : undefined;
-  add(namespaces.promises(u), `On ${data.promise.date} the user said: "${data.promise.text}".`, { t: 'promise', m: promiseMerchant, d: data.promise.date, text: data.promise.text, status: 'open' }, { merchant: promiseMerchant, date: data.promise.date });
+  if (data.promise) {
+    const pm = data.promise.merchant ? merchantSlug(data.promise.merchant) : undefined;
+    add(namespaces.promises(u), `On ${data.promise.date} the user said: "${data.promise.text}".`, { t: 'promise', m: pm, d: data.promise.date, text: data.promise.text, status: 'open' }, { merchant: pm, date: data.promise.date });
+  }
 
-  const trialM = merchantSlug(data.trial.merchant);
-  add(
-    namespaces.trials(u),
-    `${data.trial.merchant} trial started ${data.trial.startedOn}${data.trial.endsOn ? `, ending ${data.trial.endsOn}` : ''}. Reason: ${data.trial.reason}.`,
-    { t: 'trial_start', m: trialM, d: data.trial.startedOn, endsAt: data.trial.endsOn, convertsTo: data.trial.convertsTo, cur: 'USD', reason: data.trial.reason, card: data.trial.card },
-    { merchant: trialM, date: data.trial.startedOn },
-  );
+  if (data.trial) {
+    const t = data.trial;
+    const tm = merchantSlug(t.merchant);
+    add(
+      namespaces.trials(u),
+      `${t.merchant} trial started ${t.startedOn}${t.endsOn ? `, ending ${t.endsOn}` : ''}.${t.reason ? ` Reason: ${t.reason}.` : ''}`,
+      { t: 'trial_start', m: tm, d: t.startedOn, endsAt: t.endsOn, convertsTo: t.convertsTo, cur: t.convertsTo ? 'USD' : undefined, reason: t.reason, card: t.card },
+      { merchant: tm, date: t.startedOn },
+    );
+  }
 
   return items;
 }
 
 async function main() {
+  const dryRun = process.argv.includes('--dry-run');
   const salt = process.env.NS_SALT;
   if (!salt) throw new Error('NS_SALT is not set');
   const data = SeedData.parse(JSON.parse(readFileSync(new URL('./seed-data.local.json', import.meta.url), 'utf8')));
+  const u = userHash('demo-account', salt);
+  const items = buildItems(u, data);
+
+  const unknown = data.cards.filter((c) => c.provider === 'UNKNOWN').map((c) => c.label);
+  console.log(`${items.length} memories for demo user ${u}:`);
+  for (const item of items) console.log(`  [${item.namespace.replace(u, 'u')}] ${item.sentence}`);
+  if (dryRun) {
+    if (unknown.length) console.log(`Provider still UNKNOWN for: ${unknown.join(', ')}`);
+    console.log('Dry run: nothing written.');
+    return;
+  }
+  if (unknown.length) throw new Error(`Fill in the provider for: ${unknown.join(', ')}`);
 
   const db = createDb();
   const store = postgresDrainStore(db);
   const memwal = getMemWal();
-  const u = userHash('demo-account', salt);
 
   await db.insert(users).values({ id: u, homeCurrency: data.homeCurrency, providers: [...new Set(data.cards.map((c) => c.provider))] }).onConflictDoNothing();
 
-  const items = buildItems(u, data);
   await enqueue(
     db,
     items.map((item) => {
@@ -107,7 +137,6 @@ async function main() {
       return { userId: u, namespace: item.namespace, idempotencyKey: h, text: encodeEnvelope(item.sentence, { ...item.event, h }) };
     }),
   );
-  console.log(`demo user ${u}: ${items.length} memories queued`);
 
   for (let round = 0; round < 40; round++) {
     const result = await drainOnce(store, memwal);

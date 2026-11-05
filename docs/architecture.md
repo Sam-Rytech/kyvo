@@ -123,6 +123,7 @@ type ExtractedEvent =
   | { kind: "price_change"; merchant: string; from?: number; to: number; effective?: string }
   | { kind: "card_added"; merchant: string; date: string; cardHint?: string }   // $0 or $1 authorization
   | { kind: "usage_bill"; merchant: string; amount: number; period?: string; date: string }
+  | { kind: "refund"; merchant: string; amount: number; date: string; cardHint?: string }  // forecasts must not count refunded charges
   | { kind: "card_topup"; provider: string; amount: number; currency: string; date: string };
 ```
 
