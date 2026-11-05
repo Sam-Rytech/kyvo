@@ -54,7 +54,7 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 - [x] Trial tracker; card-on-file registry; usage-billed detection; price-hike detector; promises
 - [x] "Why?" panel citing blob IDs for every number
 
-**Gate 3:** the dashboard shows the next funding amount in NGN with a "Why?" panel. The forecast-error chart shows at least 2 months of real data, replayed from your history and labelled hindcast. The "Ignore memory" toggle visibly changes the answer.
+**Gate 3:** the dashboard shows the next funding amount in NGN with a "Why?" panel. The forecast-error chart shows at least 2 months of real data, replayed from your history and labelled hindcast. The "Ignore memory" toggle visibly changes the answer. **Passed Nov 5:** dashboard says fund $22.58 by Nov 16 (≈ ₦30,371) with a "Why?" panel citing blob IDs. The chart shows 7 months of real history, labelled hindcast. The toggle changes it to $23.99 by Nov 11. Total Recall restored all 50 memories with identical results.
 
 ---
 
@@ -119,3 +119,4 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Owner's profile corrected to Zenith Bank and Bybit with a new memory; a rebuild restores the newest. | — |
 | Nov 5 | Rewrote git history to remove real card digits and receipt numbers from early test files; force-pushed with the owner's approval. `ai-builder-v0` unchanged. Old commits stay reachable on GitHub only by exact hash. | — |
 | Nov 5 | Owner reviewed and approved the 15 redacted email fixtures: committed, 15/15 on the real model. **Day 2 complete.** | Vault wallet empty; Discord question open |
+| Nov 5 | Day 3: forecast, hindcast scoring, decline guard, trials, card registry, hikes and promises built test-first; 159 tests pass, 15/15 on the extractor. Provider fees re-verified, which corrected several numbers. Real runs exposed the relayer's 20-ID status limit and engine results depending on row order: both fixed. **Gate 3 passed.** Not done: provider funding markup (no real top-up to compare yet, so local amounts use the market rate and show "≈"); the demo account has no forecasts yet (Day 5). | Vault wallet empty; Discord question open; a real naira amount needed to set the funding markup |
