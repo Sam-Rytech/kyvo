@@ -73,12 +73,12 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ## Day 5 (Mon Nov 9): polish and the shareable part
 - [x] Dollar Wrapped monthly report page (shareable image and link). Accuracy is computed from the same replay as the chart; shared versions show totals only
 - [x] Currency picker (NGN, GHS, KES, EGP, ZAR, UGX, INR, USD; each confirmed to return a Tatum rate). Settings page to change currency and cards later, and people can name a provider that isn't listed
-- [~] Error, empty and loading states; mobile layout, checked at phone width; a demo account seeded from your real data. Built and checked locally. **Owner review needed before it goes live, because strangers will see it**
+- [x] Error, empty and loading states; mobile layout, checked at phone width; a demo account seeded from your real data, reviewed by the owner and live
 - [~] Get 2–3 friends to connect Gmail (real usage evidence for the blog). One friend added as a Google test user; not connected yet
 - [x] README: setup, architecture link, provider-fee sources, honest limits. `docs/DEMO.md` and `docs/BLOG.md` drafted
 - [ ] Stretch, only if all gates are green: read-only MCP endpoint
 
-**Gate 5:** a stranger can open the live URL, use the demo account, and understand the product in 30 seconds. The repo has no secrets (run a secret scan).
+**Gate 5:** a stranger can open the live URL, use the demo account, and understand the product in 30 seconds. The repo has no secrets (run a secret scan). **Passed Nov 5:** the live URL opens the demo with the explanation above it, at desktop and phone width; all signed-out writes are refused; the secret scan over full history is clean. Understanding in 30 seconds was judged by Claude, not tested on a real stranger.
 
 ---
 
@@ -123,5 +123,6 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 | Nov 5 | Day 4 built: vault, family payments, Telegram, daily cron, /status, /proof. 207 tests pass. Found the Tatum gateway now refuses address queries with no starting checkpoint, and `@mysten/dapp-kit` is deprecated: both handled and documented. **Gate 4 not passed yet.** | Owner: link Telegram; fund the wallet for the real payment |
 | Nov 5 | Telegram linked after fixing links whose signature contained an underscore. Live cron delivered a digest; a repeat run skipped it. Only the real USDC payment remains for Gate 4. | Owner's wallet funds |
 | Nov 5 | Real 0.01 USDC payment verified on Sui mainnet through Tatum, shown as paid, with a memory on Walrus. **Gate 4 passed. Day 4 complete.** | Naira amount for the funding markup; Discord question open |
-| Nov 5 | Day 5 built: Wrapped with share link and image, read-only demo account replacing all sample data, landing explanation, settings, custom providers, 8 currencies, not-found page, README, demo script and blog draft. 221 tests pass; production build checked at desktop and phone width. Secret scan over full history clean. One friend added as a Google test user. **Gate 5 not passed yet:** the demo isn't live until the owner reviews it. | Owner review of demo data; Discord question open |
-| Nov 5 | Zenith funding markup set to 1.06% from a real payment: NGN 28,939 for $21.50 on Oct 18, against a market rate of about 1,331.90. One data point, so still shown as "≈". `NS_SALT` backup confirmed. | Owner review of demo data; Discord question open |
+| Nov 5 | Day 5 built: Wrapped with share link and image, read-only demo account replacing all sample data, landing explanation, settings, custom providers, 8 currencies, not-found page, README, demo script and blog draft. 221 tests pass; production build checked at desktop and phone width. Secret scan over full history clean. One friend added as a Google test user. **Gate 5 not passed yet:** the demo isn't live until the owner reviews it. | Discord question open |
+| Nov 5 | Zenith funding markup set to 1.06% from a real payment: NGN 28,939 for $21.50 on Oct 18, against a market rate of about 1,331.90. One data point, so still shown as "≈". `NS_SALT` backup confirmed. | Discord question open |
+| Nov 5 | Owner approved the demo data; deployed. Live checks passed for pages, share link and image, tampered links, signed-out writes and signed-in Settings. **Gate 5 passed. Day 5 complete, apart from friends connecting Gmail.** | Friend to connect Gmail; Discord question open |
