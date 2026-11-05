@@ -92,7 +92,7 @@ flowchart LR
 | Chain reads | Tatum Sui **GraphQL** `https://sui-mainnet.gateway.tatum.io/graphql`, header `x-api-key` | Other entrants report JSON-RPC as retired; GraphQL gives filtered history |
 | Chain fallback | Tatum Sui gRPC `https://sui-mainnet-grpc.gateway.tatum.io`, **native** transport (`@protobuf-ts/grpc-transport`) | gRPC-web gets rejected by the gateway |
 | FX | Tatum Data API `GET /v4/data/rate/symbol` and OHLCV | Supports NGN, GHS, KES, EGP and other fiats |
-| Wallet | `@mysten/dapp-kit` | Connect the vault and family-member wallets |
+| Wallet | `@mysten/dapp-kit-react` (`@mysten/dapp-kit` is deprecated: JSON-RPC only), plus pasting an address | Read the vault address. Kyvo never signs or moves money |
 | Inbox | Gmail API, `gmail.readonly` scope (Outlook via Microsoft Graph `Mail.Read` is a stretch) | Automatic data |
 | LLM | Vercel AI SDK + Groq free plan (`openai/gpt-oss-20b`), with `generateText`, `Output.object` and Zod | Strict JSON extraction at no cost; no default retention of inference data |
 | Notifications | Telegram Bot API via `grammy` (webhook) | Free; instant reminders |
@@ -154,7 +154,8 @@ type ExtractedEvent =
 | `ky:<u>:cards` | Card registry: card labels and provider, entered balances, top-ups. Who holds each card is derived from merchant events |
 | `ky:<u>:promises` | "I'll cancel X", "Don't let AWS charge again" |
 | `ky:<u>:forecasts:<month>` | Each forecast, then its actual and its error. One namespace per month, so they can't pile up past the recall cap |
-| `ky:<u>:family` | Shared plans, members, payments, lateness |
+| `ky:<u>:family` | Shared plans and members |
+| `ky:<u>:family:<year>` | Verified payments and lateness, by year so they can't pile up past the recall cap |
 
 ### 6.2 Envelope (one memory = one fact)
 ```
@@ -226,7 +227,7 @@ USDC coin type on Sui mainnet: `0xdba34672e30cb065b1f93e3ab55318768fd6fef66c1594
 | Use | Interface | Detail |
 |---|---|---|
 | Vault USDC balance | Sui GraphQL | `address(address:$a){ balance(coinType:$usdc){ totalBalance } }` |
-| Incoming family payments | Sui GraphQL | `transactions(filter:{affectedAddress:$a}) { nodes { digest sender{address} effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } } } }` |
+| Incoming family payments | Sui GraphQL | `transactions(last:50, filter:{affectedAddress:$a, afterCheckpoint:$f}) { nodes { digest sender{address} effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } } } }`. `afterCheckpoint` is required (§13) |
 | Verify one payment | Sui GraphQL / gRPC | Look up by digest; check status, amount and recipient |
 | FX now | Data API | `GET https://api.tatum.io/v4/data/rate/symbol?symbol=USDC&basePair=NGN` |
 | FX history | Data API | `GET /v4/data/rate/symbol/ohlcv` (needs a `unix` or `time` parameter; other parameters still to be confirmed when this is built), for the "rate moved X% this week" alert |
@@ -265,7 +266,7 @@ kyvo/
   lib/inbox/              gmail, query builder, extractor (AI SDK + Zod)
   lib/engines/            forecast, decline-guard, trials, registry, hikes, promises, family
   config/providers.ts     provider rules table
-  db/                     drizzle schema: users, tokens, outbox, cache_events, seen_messages, scan_cursors, drain_state
+  db/                     drizzle schema: users, tokens, outbox, cache_events, seen_messages, scan_cursors, notifications, drain_state
   scripts/                seed-demo, probe-tatum, probe-memwal, proof
   tests/                  vitest unit tests + live smoke tests
   docs/                   architecture.md, Progress.md, BLOG.md, DEMO.md
@@ -302,7 +303,10 @@ The Walrus Memory SDK doesn't read environment variables, so pass every value ex
 9. Gmail testing mode allows 100 test users, and logins expire after about 7 days. Re-connect before recording.
 10. Gasless USDC transfers below 0.01 failed for TwiceShy. Use amounts of 0.01 USDC or more.
 11. Tatum free plan: 3 requests per second and 100K credits.
-12. Groq's docs list `openai/gpt-oss-20b` at 30 requests/min, 1K requests/day, 8K tokens/min and 200K tokens/day, but it's unclear whether that table is the free plan. Check console.groq.com/settings/limits. A 12-month backfill may take more than one day of quota.
+12. The Tatum gateway prunes old Sui history. An address or unfiltered `transactions` query with no starting checkpoint now fails with `OutOfRange`, so always pass `afterCheckpoint`. Mainnet runs about 4.2 checkpoints a second, and history reached back to Jan 2026 when checked in Nov 2026.
+13. Vercel Hobby runs cron once a day (±59 minutes), allows 300 seconds per function, never retries, and can deliver twice. So every daily step is safe to repeat, and Telegram messages are claimed by key before sending.
+14. The relayer accepts at most 20 job IDs per status request.
+15. Groq's docs list `openai/gpt-oss-20b` at 30 requests/min, 1K requests/day, 8K tokens/min and 200K tokens/day, but it's unclear whether that table is the free plan. Check console.groq.com/settings/limits. A 12-month backfill may take more than one day of quota.
 
 ## 14. Demo (2:30) and blog
 - **Demo beats:** the decline notification hook → connect Gmail, and the dashboard fills itself → forecast with local currency → the memory beat (forecast-error chart, plus the "Ignore memory" toggle showing what a blank forecast would say) → registry ("6 services hold your card") and trial alert → Sui proof (vault balance, verified family payment, blob IDs, `/status`) → close.

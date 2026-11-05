@@ -1,81 +1,142 @@
-'use client';
+import { and, desc, eq } from 'drizzle-orm';
+import { createDb } from '@/db';
+import { cacheEvents, users } from '@/db/schema';
+import { getSession } from '@/lib/auth/session';
+import { getTatum } from '@/lib/chain/tatum-client';
+import { getVaultUsdcBalance } from '@/lib/chain/usdc';
+import { usd } from '@/lib/format';
+import { getMemWal } from '@/lib/memory/client';
+import { userHash } from '@/lib/memory/namespaces';
+import { listUserNamespaces } from '@/lib/memory/rebuild';
 
-import { SAMPLE_DATA } from '@/lib/placeholder';
+export const metadata = { title: 'Proof · Kyvo' };
 
-export default function ProofPage() {
+const RECENT = 25;
+const LABELS: Record<string, string> = {
+  charge: 'Charge',
+  usage_bill: 'Usage bill',
+  decline: 'Decline',
+  refund: 'Refund',
+  trial_start: 'Trial',
+  price_change: 'Price change',
+  card_added: 'Card',
+  card_balance: 'Card balance',
+  card_removed: 'Card removed',
+  card_topup: 'Top-up',
+  promise: 'Promise',
+  profile: 'Profile',
+  vault: 'Vault',
+  forecast: 'Forecast',
+  forecast_result: 'Forecast score',
+  family_plan: 'Family plan',
+  family_payment: 'Family payment',
+};
+
+const short = (value: string, head = 8, tail = 6) => `${value.slice(0, head)}…${value.slice(-tail)}`;
+
+export default async function ProofPage() {
+  const session = await getSession();
+  const userId = session?.userId ?? userHash('demo-account', process.env.NS_SALT as string);
+  const db = createDb();
+
+  const [recent, payments, [user]] = await Promise.all([
+    db.select({ blobId: cacheEvents.blobId, type: cacheEvents.type, date: cacheEvents.eventDate, src: cacheEvents.event }).from(cacheEvents).where(eq(cacheEvents.userId, userId)).orderBy(desc(cacheEvents.writtenAt), desc(cacheEvents.id)).limit(RECENT),
+    db.select({ blobId: cacheEvents.blobId }).from(cacheEvents).where(and(eq(cacheEvents.userId, userId), eq(cacheEvents.type, 'family_payment'))),
+    db.select().from(users).where(eq(users.id, userId)),
+  ]);
+  // Live from the relayer, not the cache. If it's down, the page says so rather than showing an old count.
+  const namespaces = await listUserNamespaces(getMemWal(), userId).catch(() => null);
+  const total = namespaces?.reduce((sum, ns) => sum + ns.count, 0) ?? null;
+
+  let vaultBalance: number | null = null;
+  if (user?.vaultAddress) vaultBalance = await getVaultUsdcBalance(getTatum(), user.vaultAddress).catch(() => null);
+
+  const accountId = process.env.MEMWAL_ACCOUNT_ID ?? '';
+  const agentId = process.env.MEMWAL_AGENT_ID ?? '';
+  const facts = [
+    { label: 'Memories on Walrus', value: total === null ? 'Relayer unavailable' : String(total), mono: false },
+    { label: 'Namespaces', value: namespaces === null ? '—' : String(namespaces.length), mono: false },
+    { label: 'Payments verified on Sui', value: String(payments.length), mono: false },
+    ...(vaultBalance !== null ? [{ label: 'Vault balance (live)', value: `${usd(vaultBalance)} USDC`, mono: false }] : []),
+  ];
 
   return (
-<div className="space-y-lg">
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
-    <div>
-      <h1 className="text-heading-xs font-semibold text-primary">Proof</h1>
-      <p className="text-xs text-tertiary">
-        Walrus memory records and Sui transactions behind every number
-      </p>
-    </div>
-    <div className="flex items-center gap-xs">
-      <span className="text-xs px-sm py-xs bg-primary border border-secondary rounded-lg text-secondary font-mono">
-        {SAMPLE_DATA.proof.memoryCount} Memories Stored
-      </span>
-    </div>
-  </div>
+    <div className="space-y-lg">
+      <div>
+        <h1 className="text-heading-xs font-semibold text-primary">Proof</h1>
+        <p className="text-xs text-tertiary">
+          {session ? 'Your records' : 'The demo account'}, and where to check them yourself. Contents are encrypted on Walrus, so public links show the record exists but not what it says.
+        </p>
+      </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-    <div className="rounded-xl border border-secondary bg-primary p-xl shadow-xs">
-      <div className="text-xs uppercase tracking-wider text-tertiary">Total Stored Records</div>
-      <div className="text-heading-md font-mono font-bold text-primary mt-xxs">
-        {SAMPLE_DATA.proof.memoryCount}
-      </div>
-    </div>
-    <div className="rounded-xl border border-secondary bg-primary p-xl shadow-xs">
-      <div className="text-xs uppercase tracking-wider text-tertiary">Memory store</div>
-      <div className="text-heading-xs font-semibold text-primary mt-xxs">
-        Walrus Memory
-      </div>
-    </div>
-    <div className="rounded-xl border border-secondary bg-primary p-xl shadow-xs">
-      <div className="text-xs uppercase tracking-wider text-tertiary">Last write</div>
-      <div className="text-heading-xs font-semibold text-primary mt-xxs">
-        {SAMPLE_DATA.proof.lastAttestationTime}
-      </div>
-    </div>
-  </div>
-
-  <div className="rounded-xl border border-secondary bg-primary shadow-xs overflow-hidden">
-    <div className="p-md border-b border-secondary">
-      <h2 className="text-sm font-semibold text-primary">Memory records</h2>
-    </div>
-    <div className="divide-y divide-secondary">
-      {SAMPLE_DATA.proof.records.map((rec) => (
-        <div key={rec.id} className="p-xl hover:bg-secondary transition-colors">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-xs">
-            <div>
-              <div className="flex items-center gap-xs">
-                <span className="font-mono font-bold text-primary text-xs">{rec.id}</span>
-                <span className="inline-flex items-center rounded-full border border-utility-gray-200 bg-utility-gray-50 px-md py-xxs text-xs font-medium text-utility-gray-700">
-                  {rec.type}
-                </span>
-                <span className="text-xs font-medium text-primary">
-                  {rec.service}
-                </span>
-              </div>
-              <div className="text-xs font-mono text-tertiary mt-xxs">
-                Digest: {rec.sourceDigest} • Extracted: {rec.extractedDate}
-              </div>
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-mono text-brand-primary block truncate max-w-xs">
-                {rec.chainTxHash}
-              </span>
-              <span className="text-xs text-tertiary">
-                {rec.chainNetwork}
-              </span>
-            </div>
+      <dl className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        {facts.map((fact) => (
+          <div key={fact.label} className="rounded-xl border border-secondary bg-primary p-lg shadow-xs">
+            <dt className="text-xs text-tertiary">{fact.label}</dt>
+            <dd className="text-heading-xs font-mono font-bold text-primary mt-xxs">{fact.value}</dd>
           </div>
-        </div>
-      ))}
+        ))}
+      </dl>
+
+      <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-xs" aria-labelledby="account-title">
+        <h2 id="account-title" className="text-sm font-semibold text-primary">
+          On-chain identity
+        </h2>
+        <p className="text-sm text-secondary">
+          Walrus Memory account:{' '}
+          <a href={`https://suiscan.xyz/mainnet/object/${accountId}`} target="_blank" rel="noreferrer" className="font-mono text-brand-primary underline">
+            {short(accountId)}
+          </a>
+        </p>
+        <p className="text-sm text-secondary">
+          Delegate public key: <span className="font-mono">{short(agentId)}</span>
+        </p>
+        {user?.vaultAddress && (
+          <p className="text-sm text-secondary">
+            Vault:{' '}
+            <a href={`https://suiscan.xyz/mainnet/account/${user.vaultAddress}`} target="_blank" rel="noreferrer" className="font-mono text-brand-primary underline">
+              {short(user.vaultAddress)}
+            </a>
+          </p>
+        )}
+        <p className="text-sm text-secondary">
+          Code:{' '}
+          <a href="https://github.com/Sam-Rytech/kyvo" target="_blank" rel="noreferrer" className="text-brand-primary underline">
+            github.com/Sam-Rytech/kyvo
+          </a>
+        </p>
+      </section>
+
+      <section className="rounded-xl border border-secondary bg-primary shadow-xs" aria-labelledby="records-title">
+        <h2 id="records-title" className="text-sm font-semibold text-primary p-lg border-b border-secondary">
+          Latest records
+        </h2>
+        {recent.length === 0 ? (
+          <p className="p-lg text-sm text-tertiary">No records yet.</p>
+        ) : (
+          <ul className="divide-y divide-secondary">
+            {recent.map((record) => (
+              <li key={record.blobId} className="px-lg py-sm flex items-center justify-between gap-md text-sm">
+                <span className="text-secondary">
+                  {LABELS[record.type] ?? record.type}
+                  {record.src?.src === 'hindcast' ? ' (hindcast)' : ''}
+                  {record.src?.digest ? (
+                    <>
+                      {' · '}
+                      <a href={`https://suiscan.xyz/mainnet/tx/${String(record.src.digest)}`} target="_blank" rel="noreferrer" className="text-brand-primary underline">
+                        Sui transaction
+                      </a>
+                    </>
+                  ) : null}
+                </span>
+                <a href={`https://walruscan.com/mainnet/blob/${record.blobId}`} target="_blank" rel="noreferrer" className="font-mono text-xs text-brand-primary underline shrink-0">
+                  {short(record.blobId)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
-  </div>
-</div>
   );
 }

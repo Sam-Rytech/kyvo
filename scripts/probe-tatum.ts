@@ -44,9 +44,10 @@ async function main() {
   const coin = await graphql('query($c:String!){ coinMetadata(coinType:$c){ symbol decimals name } }', { c: USDC });
   console.log(`USDC coin type [${coin.status}, ${coin.ms}ms]:`, JSON.stringify(coin.body));
 
+  const checkpoint = await graphql('{ checkpoint{ sequenceNumber } }', {});
   const latest = await graphql(
-    'query{ transactions(last:1){ nodes{ digest sender{address} effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } } } } }',
-    {},
+    'query($f:UInt53!){ transactions(last:1, filter:{afterCheckpoint:$f}){ nodes{ digest sender{address} effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } } } } }',
+    { f: Number(checkpoint.body?.data?.checkpoint?.sequenceNumber) - 2000 },
   );
   console.log(`latest transaction [${latest.status}, ${latest.ms}ms]:`, JSON.stringify(latest.body).slice(0, 500));
 
@@ -57,8 +58,8 @@ async function main() {
   }
 
   const history = await graphql(
-    'query($a:SuiAddress!){ transactions(last:5, filter:{affectedAddress:$a}){ nodes{ digest } } }',
-    { a: VAULT },
+    'query($a:SuiAddress!,$f:UInt53!){ transactions(last:5, filter:{affectedAddress:$a, afterCheckpoint:$f}){ nodes{ digest } } }',
+    { a: VAULT, f: Number(checkpoint.body?.data?.checkpoint?.sequenceNumber) - 7 * 364_000 },
   );
   console.log(`vault history filter [${history.status}, ${history.ms}ms]:`, JSON.stringify(history.body).slice(0, 300));
 

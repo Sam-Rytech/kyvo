@@ -60,6 +60,12 @@ export async function recallNamespace(memory: RebuildMemory, ns: NamespaceInfo):
   return result.results.map((m) => ({ text: m.text, blobId: m.blob_id, writtenAt: m.created_at ? new Date(m.created_at) : null }));
 }
 
+/** Results come newest first, so the first one found is the current vault. */
+export function decodedVault(texts: string[]): string | null {
+  const vault = texts.map(decodeEnvelope).find((d) => d?.event.t === 'vault');
+  return typeof vault?.event.address === 'string' ? vault.event.address : null;
+}
+
 export function decodedProfile(texts: string[]): { homeCurrency?: string; providers?: string[] } | null {
   const profile = texts.map(decodeEnvelope).find((d) => d?.event.t === 'profile');
   if (!profile) return null;

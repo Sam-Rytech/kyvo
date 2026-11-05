@@ -32,6 +32,8 @@ export const namespaces = {
   /** One namespace per month, so forecasts can never pile up past the recall cap. */
   forecasts: (u: string, month: string) => `ky:${u}:forecasts:${month}`,
   family: (u: string) => `ky:${u}:family`,
+  /** Payments by year, so they can never pile up past the recall cap. */
+  familyPayments: (u: string, year: string) => `ky:${u}:family:${year}`,
 };
 
 /** sha256(userId + eventType + merchant + date + amount), per architecture §5.3 */

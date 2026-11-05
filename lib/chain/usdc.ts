@@ -47,7 +47,7 @@ type TxNode = {
 
 export function toVaultTransaction(node: TxNode, vault: string): VaultTransaction {
   const received = (node.effects?.balanceChanges.nodes ?? [])
-    .filter((c) => c.owner?.address === vault && c.coinType.repr === USDC_COIN_TYPE && BigInt(c.amount) > 0n)
+    .filter((c) => c.owner?.address?.toLowerCase() === vault.toLowerCase() && c.coinType.repr === USDC_COIN_TYPE && BigInt(c.amount) > 0n)
     .reduce((sum, c) => sum + BigInt(c.amount), 0n);
   return {
     digest: node.digest,
@@ -58,14 +58,36 @@ export function toVaultTransaction(node: TxNode, vault: string): VaultTransactio
   };
 }
 
+/** About 4.2 checkpoints a second, measured on mainnet in November 2026. */
+const CHECKPOINTS_PER_DAY = 364_000;
+const LOOKBACK_DAYS = [120, 30, 7];
+
+export async function getLatestCheckpoint(tatum: TatumClient): Promise<number> {
+  const data = await tatum.graphql<{ checkpoint: { sequenceNumber: number } }>(endpoint(), '{ checkpoint{ sequenceNumber } }');
+  return Number(data.checkpoint.sequenceNumber);
+}
+
+/**
+ * The gateway prunes old history, and refuses an address filter with no starting checkpoint.
+ * So this asks from a recent checkpoint, and looks back less far if that's refused too.
+ */
 export async function getVaultTransactions(tatum: TatumClient, address: string, last = 50): Promise<VaultTransaction[]> {
-  const data = await tatum.graphql<{ transactions: { nodes: TxNode[] } }>(
-    endpoint(),
-    `query($a:SuiAddress!,$n:Int!){ transactions(last:$n, filter:{affectedAddress:$a}){ nodes{
-      digest sender{address}
-      effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } }
-    } } }`,
-    { a: address, n: last },
-  );
-  return data.transactions.nodes.map((node) => toVaultTransaction(node, address));
+  const latest = await getLatestCheckpoint(tatum);
+  let lastError: unknown;
+  for (const days of LOOKBACK_DAYS) {
+    try {
+      const data = await tatum.graphql<{ transactions: { nodes: TxNode[] } }>(
+        endpoint(),
+        `query($a:SuiAddress!,$n:Int!,$f:UInt53!){ transactions(last:$n, filter:{affectedAddress:$a, afterCheckpoint:$f}){ nodes{
+          digest sender{address}
+          effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } }
+        } } }`,
+        { a: address, n: last, f: latest - days * CHECKPOINTS_PER_DAY },
+      );
+      return data.transactions.nodes.map((node) => toVaultTransaction(node, address));
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
 }

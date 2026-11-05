@@ -12,6 +12,9 @@ import { buildHindcast } from '@/lib/engines/hindcast';
 import { merchantHistories } from '@/lib/engines/history';
 import { promiseStates } from '@/lib/engines/promises';
 import { trialStates } from '@/lib/engines/trials';
+import { makeLinkCode } from '@/lib/auth/crypto';
+import { getVaultUsdcBalance } from '@/lib/chain/usdc';
+import { vaultRunway, type VaultRunway } from '@/lib/engines/vault';
 import { getUsdcRate, type Rate } from '@/lib/fx/tatum-rates';
 
 export default async function DashboardPage() {
@@ -35,8 +38,22 @@ export default async function DashboardPage() {
     }
   }
 
+  let runway: VaultRunway | null = null;
+  let vaultUnavailable = false;
+  if (user?.vaultAddress) {
+    try {
+      runway = vaultRunway(await getVaultUsdcBalance(getTatum(), user.vaultAddress), events, currency, asOf);
+    } catch {
+      vaultUnavailable = true; // Never shown as an empty vault.
+    }
+  }
+  const bot = process.env.TELEGRAM_BOT_USERNAME ?? 'Kyvoalert_bot';
+  const telegramLink = `https://t.me/${bot}?start=${makeLinkCode(session.userId, process.env.TOKEN_ENC_KEY as string)}`;
+
   return (
     <DashboardView
+      vault={{ address: user?.vaultAddress ?? null, runway, unavailable: vaultUnavailable }}
+      telegram={{ linked: Boolean(user?.telegramChatId), linkUrl: telegramLink }}
       funding={buildFunding(events, currency, asOf)}
       blank={blankForecasts(merchantHistories(events, currency), asOf)}
       hindcast={buildHindcast(events, currency, asOf)}

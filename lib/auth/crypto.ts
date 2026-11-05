@@ -22,6 +22,32 @@ export function decryptToken(encoded: string, root: string): string {
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
 }
 
+const LINK_TTL_MS = 60 * 60 * 1000;
+
+/** Telegram's start parameter allows 64 characters of A-Z, a-z, 0-9, _ and -. */
+export function makeLinkCode(userId: string, root: string, now: number = Date.now()): string {
+  const payload = `${userId}_${(now + LINK_TTL_MS).toString(36)}`;
+  const signature = createHmac('sha256', subkey(root, 'telegram-link')).update(payload).digest().subarray(0, 16).toString('base64url');
+  return `${payload}_${signature}`;
+}
+
+export function readLinkCode(code: string, root: string, now: number = Date.now()): string | null {
+  const parts = code.split('_');
+  if (parts.length < 3) return null;
+  const signature = parts.pop() as string;
+  const expiry = parts.pop() as string;
+  const userId = parts.join('_');
+  const expected = createHmac('sha256', subkey(root, 'telegram-link')).update(`${userId}_${expiry}`).digest().subarray(0, 16);
+  const given = Buffer.from(signature, 'base64url');
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
+  return parseInt(expiry, 36) >= now ? userId : null;
+}
+
+/** Telegram sends this with every webhook call, so only Telegram can reach the bot. */
+export function webhookSecret(root: string): string {
+  return createHmac('sha256', subkey(root, 'telegram-webhook')).update('webhook').digest('hex');
+}
+
 export type SessionData = { userId: string; email: string; exp: number };
 
 export function signSession(data: SessionData, root: string): string {

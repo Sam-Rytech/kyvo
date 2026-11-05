@@ -78,6 +78,17 @@ export const scanCursors = pgTable('scan_cursors', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// What has already been sent. Cron delivery can repeat, and this makes that harmless.
+export const notifications = pgTable(
+  'notifications',
+  {
+    userId: text('user_id').notNull(),
+    key: text('key').notNull(),
+    sentAt: timestamp('sent_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.key] })],
+);
+
 // One row. The write cap is per account, shared by every user (architecture §5.3).
 export const drainState = pgTable('drain_state', {
   id: integer('id').primaryKey().default(1),

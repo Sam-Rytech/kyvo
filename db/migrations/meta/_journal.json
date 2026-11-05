@@ -8,6 +8,13 @@
       "when": 1793841403488,
       "tag": "0000_quick_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793896141970,
+      "tag": "0001_nifty_omega_flight",
+      "breakpoints": true
     }
   ]
 }

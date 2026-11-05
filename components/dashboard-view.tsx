@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, ChevronRight, HelpCircle } from 'lucide-react';
 import { MemorySyncStatus } from '@/components/memory-sync';
+import { TelegramCard } from '@/components/telegram-card';
+import { VaultCard } from '@/components/vault-card';
 import { useWhy, type WhyRecord } from '@/components/why-panel';
 import type { GuardAlert } from '@/lib/engines/decline-guard';
 import type { BlankForecast, Funding } from '@/lib/engines/forecast';
 import type { HindcastMonth } from '@/lib/engines/hindcast';
 import type { PromiseState } from '@/lib/engines/promises';
 import type { TrialState } from '@/lib/engines/trials';
+import type { VaultRunway } from '@/lib/engines/vault';
 import { approxLocal, monthLabel, shortDate, usd } from '@/lib/format';
 
 type Props = {
@@ -23,9 +26,11 @@ type Props = {
   rateSource: string | null;
   currency: string;
   hasMemories: boolean;
+  vault: { address: string | null; runway: VaultRunway | null; unavailable: boolean };
+  telegram: { linked: boolean; linkUrl: string };
 };
 
-export function DashboardView({ funding, blank, hindcast, alerts, trials, promises, rate, rateSource, currency, hasMemories }: Props) {
+export function DashboardView({ funding, blank, hindcast, alerts, trials, promises, rate, rateSource, currency, hasMemories, vault, telegram }: Props) {
   const { openWhy } = useWhy();
   const [ignoreMemory, setIgnoreMemory] = useState(false);
 
@@ -217,6 +222,8 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+        <VaultCard address={vault.address} runway={vault.runway} unavailable={vault.unavailable} rate={rate} currency={currency} />
+        <TelegramCard linked={telegram.linked} linkUrl={telegram.linkUrl} />
         <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs" aria-labelledby="trials-title">
           <div className="flex items-center justify-between">
             <h2 id="trials-title" className="text-sm font-semibold text-primary">

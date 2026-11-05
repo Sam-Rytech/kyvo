@@ -5,7 +5,7 @@ import { cacheEvents, outbox, seenMessages, users } from '@/db/schema';
 import { getSession } from '@/lib/auth/session';
 import { getMemWal } from '@/lib/memory/client';
 import { decodeEnvelope } from '@/lib/memory/envelope';
-import { decodedProfile, listUserNamespaces, REBUILD_BATCH, RebuildIncompleteError, recallNamespace } from '@/lib/memory/rebuild';
+import { decodedProfile, decodedVault, listUserNamespaces, REBUILD_BATCH, RebuildIncompleteError, recallNamespace } from '@/lib/memory/rebuild';
 import { cacheMemory } from '@/lib/memory/store';
 
 export const maxDuration = 60;
@@ -40,6 +40,8 @@ export async function POST(request: Request) {
         const values = { homeCurrency: profile.homeCurrency ?? 'NGN', providers: profile.providers ?? [] };
         await db.insert(users).values({ id: userId, email, ...values }).onConflictDoUpdate({ target: users.id, set: values });
       }
+      const vaultAddress = decodedVault(memories.map((m) => m.text));
+      if (vaultAddress) await db.insert(users).values({ id: userId, email, vaultAddress }).onConflictDoUpdate({ target: users.id, set: { vaultAddress } });
       for (const item of memories) {
         if (await cacheMemory(db, { userId, namespace: ns.name, text: item.text, blobId: item.blobId, writtenAt: item.writtenAt })) restored++;
         const event = decodeEnvelope(item.text)?.event;

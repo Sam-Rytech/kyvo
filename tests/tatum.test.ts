@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTatumClient, TatumUnavailableError } from '@/lib/chain/tatum-client';
-import { toVaultTransaction, USDC_COIN_TYPE, usdcFromBaseUnits } from '@/lib/chain/usdc';
+import { getVaultTransactions, toVaultTransaction, USDC_COIN_TYPE, usdcFromBaseUnits } from '@/lib/chain/usdc';
 import { clearRateCache, getUsdcRate, toLocal } from '@/lib/fx/tatum-rates';
 
 function harness(responses: { status: number; body?: unknown }[]) {
@@ -46,6 +46,42 @@ describe('Tatum client', () => {
   it('surfaces GraphQL errors instead of returning empty data', async () => {
     const { client } = harness([{ status: 200, body: { errors: [{ message: 'bad query' }] } }]);
     await expect(client.graphql('https://x', '{ a }')).rejects.toThrow('bad query');
+  });
+});
+
+describe('vault history', () => {
+  const responses = (fail = 0) => {
+    const calls: { query: string; variables: Record<string, unknown> }[] = [];
+    let failures = fail;
+    const client = createTatumClient('k', {
+      now: () => 0,
+      sleep: async () => {},
+      fetch: (async (_url: string, init: RequestInit) => {
+        const body = JSON.parse(init.body as string);
+        calls.push(body);
+        if (body.query.includes('checkpoint{')) return new Response(JSON.stringify({ data: { checkpoint: { sequenceNumber: 100_000_000 } } }));
+        if (failures-- > 0) return new Response(JSON.stringify({ errors: [{ message: 'Failed to list transactions' }] }));
+        return new Response(JSON.stringify({ data: { transactions: { nodes: [] } } }));
+      }) as typeof fetch,
+    });
+    return { client, calls };
+  };
+
+  it('always gives the gateway a starting checkpoint, which it now requires', async () => {
+    process.env.TATUM_SUI_GRAPHQL = 'https://example.test/graphql';
+    const { client, calls } = responses();
+    await getVaultTransactions(client, '0xabc');
+    const query = calls.find((c) => c.variables?.a);
+    expect(query?.variables.f).toBe(100_000_000 - 120 * 364_000);
+  });
+
+  it('looks back less far if refused, then reports the failure rather than saying no payments', async () => {
+    process.env.TATUM_SUI_GRAPHQL = 'https://example.test/graphql';
+    const once = responses(1);
+    await expect(getVaultTransactions(once.client, '0xabc')).resolves.toEqual([]);
+    expect(once.calls.at(-1)?.variables.f).toBe(100_000_000 - 30 * 364_000);
+    const always = responses(9);
+    await expect(getVaultTransactions(always.client, '0xabc')).rejects.toBeInstanceOf(TatumUnavailableError);
   });
 });
 

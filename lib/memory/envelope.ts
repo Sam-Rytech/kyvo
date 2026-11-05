@@ -18,7 +18,8 @@ export type EventType =
   | 'forecast'
   | 'forecast_result'
   | 'family_plan'
-  | 'family_payment';
+  | 'family_payment'
+  | 'vault';
 
 export type MemoryEvent = {
   v: 1;

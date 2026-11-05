@@ -33,7 +33,9 @@ const navItems = [
 ];
 
 // Pages that show real data once signed in. Every other page stays labelled as a sample.
-const LIVE_ROUTES = new Set(['/', '/subscriptions', '/trials', '/cards', '/onboarding']);
+const LIVE_ROUTES = new Set(['/', '/subscriptions', '/trials', '/cards', '/family', '/onboarding']);
+// Real for everyone, signed in or not.
+const ALWAYS_LIVE = new Set(['/status', '/proof']);
 
 const AUTH_ERRORS: Record<string, string> = {
   denied: 'Sign-in was cancelled.',
@@ -114,7 +116,7 @@ export function AppShell({ children, email }: { children: ReactNode; email: stri
   };
 
   const ThemeIcon = isDark ? Sun : Moon;
-  const showSampleBadge = !email || !LIVE_ROUTES.has(pathname);
+  const showSampleBadge = !ALWAYS_LIVE.has(pathname) && (!email || !LIVE_ROUTES.has(pathname));
 
   return (
     <WhyProvider>
