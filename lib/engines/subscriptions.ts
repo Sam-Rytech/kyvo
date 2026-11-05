@@ -1,5 +1,6 @@
-// Current state derived only from cached events, so it comes out the same after
-// a Total Recall. Forecasting is built on top of this on Day 3.
+// Current state derived only from cached events, so it comes out the same after a Total Recall.
+import { VAT_RATES } from '@/config/providers';
+
 export type CachedEvent = {
   type: string;
   merchant: string | null;
@@ -23,11 +24,15 @@ export type SubscriptionView = {
   refundCount: number;
   usageBilled: boolean;
   priceChange: { from: number; to: number } | null;
+  /** The bill rose, but only because tax was added */
+  taxRise: { from: number; to: number } | null;
   records: SubscriptionRecord[];
 };
 
 const SUBSCRIPTION_TYPES = new Set(['charge', 'usage_bill', 'decline', 'refund', 'price_change', 'card_added']);
 const PAID_TYPES = new Set(['charge', 'usage_bill']);
+const RISE_THRESHOLD = 1.02;
+const VAT_TOLERANCE = 0.005;
 
 const titleCase = (slug: string) => slug.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
@@ -35,12 +40,34 @@ const num = (value: unknown) => (typeof value === 'number' ? value : null);
 const str = (value: unknown) => (typeof value === 'string' ? value : null);
 
 /** Memories can't be deleted, so a merchant billed only in the user's own currency is hidden here. */
-function isForeignBilled(list: CachedEvent[], homeCurrency: string | undefined): boolean {
+export function isForeignBilled(list: CachedEvent[], homeCurrency: string | undefined): boolean {
   if (!homeCurrency || homeCurrency === 'USD') return true;
   return list.some((e) => {
     const currency = str(e.event.cur);
     return currency !== null && currency !== homeCurrency;
   });
+}
+
+/**
+ * A hike is a rise of over 2% on a fixed-price bill (§7.4). Usage bills vary by nature. A rise
+ * that's only tax isn't a price rise: subtotals settle it when the email showed them, and
+ * otherwise a rise matching a known VAT rate is read as tax.
+ */
+function compareBills(last: CachedEvent | undefined, previous: CachedEvent | undefined, usageBilled: boolean, homeCurrency: string | undefined): Pick<SubscriptionView, 'priceChange' | 'taxRise'> {
+  const none = { priceChange: null, taxRise: null };
+  const to = last ? num(last.event.amt) : null;
+  const from = previous ? num(previous.event.amt) : null;
+  if (usageBilled || to === null || from === null || to <= from * RISE_THRESHOLD) return none;
+
+  const toSubtotal = num(last?.event.subtotal);
+  const fromSubtotal = num(previous?.event.subtotal);
+  if (toSubtotal !== null && fromSubtotal !== null) {
+    return toSubtotal > fromSubtotal * RISE_THRESHOLD ? { priceChange: { from: fromSubtotal, to: toSubtotal }, taxRise: null } : { priceChange: null, taxRise: { from, to } };
+  }
+
+  const vat = homeCurrency ? VAT_RATES[homeCurrency] : undefined;
+  if (vat !== undefined && Math.abs(to - from * (1 + vat)) <= from * VAT_TOLERANCE) return { priceChange: null, taxRise: { from, to } };
+  return { priceChange: { from, to }, taxRise: null };
 }
 
 export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string): SubscriptionView[] {
@@ -75,8 +102,7 @@ export function deriveSubscriptions(events: CachedEvent[], homeCurrency?: string
       declineCount: new Set(sorted.filter((e) => e.type === 'decline').map((e) => e.eventDate)).size,
       refundCount: sorted.filter((e) => e.type === 'refund').length,
       usageBilled,
-      // A hike is a rise of over 2% on a fixed-price bill (§7.4). Usage bills vary by nature.
-      priceChange: !usageBilled && lastAmount !== null && previousAmount !== null && lastAmount > previousAmount * 1.02 ? { from: previousAmount, to: lastAmount } : null,
+      ...compareBills(last, previous, usageBilled, homeCurrency),
       records: [...sorted].reverse().map((e) => ({
         type: e.type,
         date: e.eventDate,

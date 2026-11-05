@@ -47,12 +47,12 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cut
 ---
 
 ## Day 3 (Sat Nov 7): the engines (where the learning lives)
-- [ ] `config/providers.ts` rules table (re-verify fees from the sources in the README). Add **Zenith Bank** and **Bybit**, the owner's real cards. A provider not in the table must still get forecasts, with fees and warnings left out rather than guessed
-- [ ] Forecast engine: date, amount, card fee, local-currency total; write `forecast` events
-- [ ] Forecast scoring: `forecast_result` events; error-per-month chart; the "Ignore memory" toggle
-- [ ] Decline guard plus provider-specific warnings
-- [ ] Trial tracker; card-on-file registry; usage-billed detection; price-hike detector; promises
-- [ ] "Why?" panel citing blob IDs for every number
+- [x] `config/providers.ts` rules table (re-verify fees from the sources in the README). Add **Zenith Bank** and **Bybit**, the owner's real cards. A provider not in the table must still get forecasts, with fees and warnings left out rather than guessed
+- [x] Forecast engine: date, amount, card fee, local-currency total; write `forecast` events
+- [x] Forecast scoring: `forecast_result` events; error-per-month chart; the "Ignore memory" toggle
+- [x] Decline guard plus provider-specific warnings
+- [x] Trial tracker; card-on-file registry; usage-billed detection; price-hike detector; promises
+- [x] "Why?" panel citing blob IDs for every number
 
 **Gate 3:** the dashboard shows the next funding amount in NGN with a "Why?" panel. The forecast-error chart shows at least 2 months of real data, replayed from your history and labelled hindcast. The "Ignore memory" toggle visibly changes the answer.
 

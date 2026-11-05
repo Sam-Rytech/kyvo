@@ -33,7 +33,7 @@ const navItems = [
 ];
 
 // Pages that show real data once signed in. Every other page stays labelled as a sample.
-const LIVE_ROUTES = new Set(['/subscriptions', '/onboarding']);
+const LIVE_ROUTES = new Set(['/', '/subscriptions', '/trials', '/cards', '/onboarding']);
 
 const AUTH_ERRORS: Record<string, string> = {
   denied: 'Sign-in was cancelled.',

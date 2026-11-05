@@ -41,6 +41,7 @@ function SubscriptionRow({ sub, rate }: { sub: SubscriptionView; rate: Rate | nu
                 ${sub.priceChange.from.toFixed(2)} → ${sub.priceChange.to.toFixed(2)}
               </Badge>
             )}
+            {sub.taxRise && <Badge tone="gray">Now includes tax: ${sub.taxRise.to.toFixed(2)}</Badge>}
             {sub.declineCount > 0 && <Badge tone="error">{sub.declineCount === 1 ? '1 decline' : `${sub.declineCount} declines`}</Badge>}
             {sub.refundCount > 0 && <Badge tone="gray">{sub.refundCount === 1 ? '1 refund' : `${sub.refundCount} refunds`}</Badge>}
           </div>

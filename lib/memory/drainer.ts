@@ -107,7 +107,8 @@ export async function drainOnce(store: DrainStore, memory: BulkMemory, now: Date
 }
 
 async function pollSubmitted(store: DrainStore, memory: BulkMemory, result: DrainResult) {
-  const submitted = await store.submitted();
+  // The relayer accepts 20 job IDs per status request. The oldest go first, and the rest wait for the next call.
+  const submitted = (await store.submitted()).slice(0, MAX_BATCH);
   if (submitted.length === 0) return;
 
   const byJob = new Map(submitted.map((row) => [row.jobId, row]));

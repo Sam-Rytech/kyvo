@@ -43,7 +43,8 @@ describe('namespaces', () => {
     expect(namespaces.profile('u1')).toBe('ky:u1:profile');
     expect(namespaces.merchant('u1', 'Netflix')).toBe('ky:u1:m:netflix');
     expect(namespaces.merchant('u1', 'AWS Cloud (Hosting)')).toBe('ky:u1:m:aws-cloud-hosting');
-    expect(namespaces.forecasts('u1').startsWith(namespaces.prefix('u1'))).toBe(true);
+    expect(namespaces.forecasts('u1', '2026-10')).toBe('ky:u1:forecasts:2026-10');
+    expect(namespaces.forecasts('u1', '2026-10').startsWith(namespaces.prefix('u1'))).toBe(true);
   });
 
   it('rejects a merchant with no usable slug', () => {

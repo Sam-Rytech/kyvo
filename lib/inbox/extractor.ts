@@ -1,6 +1,7 @@
 import { createGroq } from '@ai-sdk/groq';
 import { generateText, NoObjectGeneratedError, Output } from 'ai';
 import { z } from 'zod';
+import { addDays } from '@/lib/engines/dates';
 import type { GmailMessage } from './gmail';
 
 export const MIN_CONFIDENCE = 0.6;
@@ -13,12 +14,14 @@ export const RawExtraction = z.object({
   confidence: z.number(),
   merchant: z.string().nullable(),
   amount: z.number().nullable(),
+  subtotal: z.number().nullable(),
   currency: z.string().nullable(),
   date: z.string().nullable(),
   cardHint: z.string().nullable(),
   reason: z.string().nullable(),
   period: z.string().nullable(),
   endsAt: z.string().nullable(),
+  trialDays: z.number().nullable(),
   convertsTo: z.number().nullable(),
   fromAmount: z.number().nullable(),
   toAmount: z.number().nullable(),
@@ -34,7 +37,7 @@ const optionalDate = isoDate.optional();
 const cardHint = z.string().optional();
 
 export const ExtractedEvent = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('charge'), merchant: name, amount: positive, currency, date: isoDate, cardHint }),
+  z.object({ kind: z.literal('charge'), merchant: name, amount: positive, subtotal: positive.optional(), currency, date: isoDate, cardHint }),
   z.object({ kind: z.literal('trial_start'), merchant: name, date: isoDate, endsAt: optionalDate, convertsTo: positive.optional(), currency: currency.optional() }),
   z.object({ kind: z.literal('decline'), merchant: name, amount: positive.optional(), currency: currency.optional(), date: isoDate, cardHint, reason: z.string().optional() }),
   z.object({ kind: z.literal('price_change'), merchant: name, from: positive.optional(), to: positive, currency: currency.optional(), date: isoDate, effective: optionalDate }),
@@ -68,12 +71,13 @@ export function toEvent(raw: z.infer<typeof RawExtraction>, emailDate: string, h
     merchant,
     provider: raw.provider,
     amount: raw.kind === 'price_change' ? undefined : (raw.amount ?? undefined),
+    subtotal: raw.subtotal ?? undefined,
     currency: raw.currency ?? undefined,
     date: raw.date && /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : emailDate,
     cardHint: raw.cardHint ?? undefined,
     reason: raw.reason ?? undefined,
     period: raw.period ?? undefined,
-    endsAt: raw.endsAt ?? undefined,
+    endsAt: raw.endsAt ?? (raw.trialDays ? addDays(raw.date && /^d{4}-d{2}-d{2}$/.test(raw.date) ? raw.date : emailDate, raw.trialDays) : undefined),
     convertsTo: raw.convertsTo ?? undefined,
     from: raw.fromAmount ?? undefined,
     to: raw.toAmount ?? undefined,
@@ -102,6 +106,8 @@ A notice that access was paused or suspended is decline only if it states a fail
 Rules:
 - merchant: the brand name only, with no legal suffix, and spelled the same way every time. "Anthropic, PBC" becomes "Anthropic". For a Google Play purchase, use the app's name.
 - amount: the amount actually paid, as a number. currency: the 3-letter code ($ means USD, ₦ means NGN).
+- subtotal: only if the email shows tax separately, the amount before tax.
+- trialDays: only if a trial's length is stated but not its end date ("for 30 days" is 30).
 - date and other dates: YYYY-MM-DD. Use the email's date if the body has none.
 - cardHint: the last 4 digits only, if shown. Otherwise null.
 - provider: only for card_topup, the card provider's name.

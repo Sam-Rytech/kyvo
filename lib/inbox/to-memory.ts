@@ -10,7 +10,7 @@ function describe(e: ExtractedEvent): { type: EventType; sentence: string; field
   const card = 'cardHint' in e && e.cardHint ? ` on the card ending ${e.cardHint}` : '';
   switch (e.kind) {
     case 'charge':
-      return { type: 'charge', merchant: e.merchant, amount: e.amount, sentence: `${e.merchant} charged ${money(e.amount, e.currency)} on ${e.date}${card}.`, fields: { amt: e.amount, cur: e.currency, card: e.cardHint } };
+      return { type: 'charge', merchant: e.merchant, amount: e.amount, sentence: `${e.merchant} charged ${money(e.amount, e.currency)} on ${e.date}${card}.`, fields: { amt: e.amount, subtotal: e.subtotal, cur: e.currency, card: e.cardHint } };
     case 'usage_bill':
       return { type: 'usage_bill', merchant: e.merchant, amount: e.amount, sentence: `${e.merchant} billed ${money(e.amount, e.currency)} for usage on ${e.date}${card}.`, fields: { amt: e.amount, cur: e.currency, period: e.period, card: e.cardHint } };
     case 'decline':

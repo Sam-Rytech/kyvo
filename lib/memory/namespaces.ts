@@ -29,7 +29,8 @@ export const namespaces = {
   trials: (u: string) => `ky:${u}:trials`,
   cards: (u: string) => `ky:${u}:cards`,
   promises: (u: string) => `ky:${u}:promises`,
-  forecasts: (u: string) => `ky:${u}:forecasts`,
+  /** One namespace per month, so forecasts can never pile up past the recall cap. */
+  forecasts: (u: string, month: string) => `ky:${u}:forecasts:${month}`,
   family: (u: string) => `ky:${u}:family`,
 };
 

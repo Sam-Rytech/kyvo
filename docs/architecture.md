@@ -151,9 +151,9 @@ type ExtractedEvent =
 | `ky:<u>:profile` | Home currency, card providers, preferences, stated rules |
 | `ky:<u>:m:<merchantSlug>` | Charges, declines, price changes, usage bills, card-added and card-removed events for one merchant |
 | `ky:<u>:trials` | Trial starts, conversions, the user's reasons |
-| `ky:<u>:cards` | Card registry: card labels and provider, which merchant holds which card |
+| `ky:<u>:cards` | Card registry: card labels and provider, entered balances, top-ups. Who holds each card is derived from merchant events |
 | `ky:<u>:promises` | "I'll cancel X", "Don't let AWS charge again" |
-| `ky:<u>:forecasts` | Each monthly forecast, then its actual and its error |
+| `ky:<u>:forecasts:<month>` | Each forecast, then its actual and its error. One namespace per month, so they can't pile up past the recall cap |
 | `ky:<u>:family` | Shared plans, members, payments, lateness |
 
 ### 6.2 Envelope (one memory = one fact)
@@ -180,8 +180,10 @@ type ExtractedEvent =
 - **Next charge date:** median interval between past charges (fallback: 30 days), anchored to the last charge.
 - **Amount:** the last charge, adjusted by any `price_change`. For usage-billed merchants, the median of the last 3 bills.
 - **Card fee:** add the provider's per-transaction fee from the rules table (§7.3).
-- **Funding needed:** total charges in the next N days + fees + a buffer − the known card balance. The card balance comes from top-up emails or is entered by the user; card providers expose no API.
+- **Funding needed:** total charges in the next 30 days + fees + a buffer (5%, at least $1) − the known card balance, due two days before the first charge. A merchant more than 10 days overdue, or whose only recent bill was refunded, is treated as stopped. The card balance comes from top-up emails or is entered by the user; card providers expose no API.
 - **Local currency:** `fundLocal = fundUSD × rate(USDC→homeCurrency) × (1 + providerMarkup)`, with the rate from Tatum. Tatum's rate isn't what card providers charge, so local amounts always show as "≈" and each provider has a funding markup in the rules table. The default is set by comparing a real top-up with Tatum's rate.
+
+- **Comparing with no memory:** the "Ignore memory" forecast assumes the first price ever seen repeats monthly, forever: no fees, no refunds, nothing cancelled. Both forecasts are scored the same way. A first-ever bill counts as a miss for both.
 
 ### 7.2 Decline guard
 - Runs daily. For each charge due within 48 hours, it compares against the expected card balance.
@@ -189,17 +191,19 @@ type ExtractedEvent =
 - It sends a Telegram alert with the exact amount to fund in local currency.
 
 ### 7.3 Provider rules table (`config/providers.ts`; adding a provider is data, not code)
-| Provider | Decline fee | Per-transaction fee | Termination rule |
+| Provider | Decline fee | Per-payment fee | Rule on repeated declines |
 |---|---|---|---|
-| Chipper (NG) | ₦250 | $0.90 | n/a |
-| Eversend | $0.40 | 3.5% on non-USD | 3 consecutive declines, or the first payment on a new card |
-| Grey | none | none | 3 failed charges from the same platform |
-| Raenest | $0.40 | n/a | n/a |
-| walllet | $0.50 | 1% (min $1) | n/a |
-| Cleva | $0.30 | n/a | n/a |
-| Generic bank card | 0 | 0 | n/a |
+| Chipper (NG) | ₦250 | $0.90 | Can revoke a card after repeated declines (no number published) |
+| Eversend | $0.40 (some of its pages say $0.35) | Not confirmed | 3 in a row, or the first payment on a new card. A success resets the count |
+| Grey | Not confirmed | None | 2 failed payments can get a card flagged or frozen |
+| Raenest | Not confirmed | $0.50 | Not confirmed |
+| Cleva (Standard USD) | $0.50 | Not confirmed | Can end a card after repeated declines (no number published) |
+| walllet | Not confirmed | Not confirmed | Not confirmed |
+| Bybit | Not confirmed | Not confirmed | Not confirmed |
+| Zenith Bank | Not confirmed | Not confirmed | Not confirmed |
+| Other bank card | Not confirmed | Not confirmed | Not confirmed |
 
-The cited sources are in the README. Re-verify these numbers before the demo, because providers change their terms.
+Re-verified on Nov 5, 2026, which corrected several numbers in the first draft of this table. **"Not confirmed" means Kyvo states nothing and adds no fee, rather than guessing.** Sources are in `config/providers.ts` and the README, and the app links them. Re-check before the demo, because providers change their terms.
 
 ### 7.4 Trials, registry, hikes, promises
 - **Trials:** reminders 3 days and 1 day before conversion. If no end date is found, ask the user to confirm it.

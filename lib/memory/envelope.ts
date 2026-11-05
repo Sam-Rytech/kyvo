@@ -13,6 +13,7 @@ export type EventType =
   | 'usage_bill'
   | 'refund'
   | 'card_topup'
+  | 'card_balance'
   | 'promise'
   | 'forecast'
   | 'forecast_result'

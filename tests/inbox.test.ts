@@ -99,12 +99,14 @@ const raw = (over: Partial<z.infer<typeof RawExtraction>>): z.infer<typeof RawEx
   confidence: 0.95,
   merchant: 'Anthropic',
   amount: 21.5,
+  subtotal: null,
   currency: 'usd',
   date: '2026-10-18',
   cardHint: '1234',
   reason: null,
   period: null,
   endsAt: null,
+  trialDays: null,
   convertsTo: null,
   fromAmount: null,
   toAmount: null,
@@ -157,6 +159,20 @@ describe('toEvent', () => {
 
   it('keeps every bill for a user whose home currency is USD', () => {
     expect(toEvent(raw({ currency: 'USD' }), '2026-10-17', 'USD')).not.toBeNull();
+  });
+
+  it('works out a trial end date from its stated length', () => {
+    const event = toEvent(raw({ kind: 'trial_start', merchant: 'GitLab', amount: null, currency: null, trialDays: 30, date: '2026-10-16' }), '2026-10-16');
+    expect(event).toMatchObject({ kind: 'trial_start', endsAt: '2026-11-15' });
+  });
+
+  it('keeps a stated end date over a computed one', () => {
+    const event = toEvent(raw({ kind: 'trial_start', merchant: 'Canva', amount: null, currency: null, endsAt: '2026-08-17', trialDays: 30, date: '2026-05-19' }), '2026-05-19');
+    expect(event).toMatchObject({ endsAt: '2026-08-17' });
+  });
+
+  it('keeps the subtotal on a charge, so tax is not read as a price rise', () => {
+    expect(toEvent(raw({ subtotal: 20 }), '2026-10-18')).toMatchObject({ amount: 21.5, subtotal: 20 });
   });
 
   it('removes legal suffixes from merchants', () => {

@@ -93,6 +93,30 @@ describe('drainOnce', () => {
     expect(calls).toHaveLength(2);
   });
 
+  it('never asks about more than 20 jobs at once, as the relayer refuses more', async () => {
+    const { rows, store } = memoryStore(45);
+    const asked: number[] = [];
+    let job = 0;
+    const memory: BulkMemory = {
+      rememberBulk: async (items) => ({ job_ids: items.map(() => `job-${++job}`), total: items.length, status: 'accepted' }),
+      getRememberBulkStatus: async (ids) => {
+        asked.push(ids.length);
+        if (ids.length > 20) throw new Error('job_ids exceeds maximum of 20 per bulk status request');
+        return { results: [] };
+      },
+    };
+    // A backlog builds up while jobs are still running, then every poll stays within the limit.
+    await drainOnce(store, memory, t0);
+    await drainOnce(store, memory, after(61));
+    await drainOnce(store, memory, after(122));
+    expect(rows.filter((r) => r.status === 'submitted').length).toBeGreaterThan(20);
+    expect(Math.max(...asked)).toBeLessThanOrEqual(20);
+
+    memory.getRememberBulkStatus = async (ids) => ({ results: ids.map((job_id) => ({ job_id, status: 'done' as const, blob_id: `blob-${job_id}` })) });
+    for (let i = 0; i < 3; i++) await drainOnce(store, memory, after(200 + i));
+    expect(rows.every((r) => r.status === 'stored')).toBe(true);
+  });
+
   it('skips when another drain holds the lease', async () => {
     const { store, hold } = memoryStore(3);
     const { memory, calls } = countingMock();
