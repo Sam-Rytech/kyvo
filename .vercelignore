@@ -1,0 +1,6 @@
+.env*
+*.local.json
+.claude/
+docs/
+tests/
+scripts/

@@ -130,13 +130,13 @@ type ExtractedEvent =
 1. Each event becomes a memory envelope (§6) and is inserted into the Postgres `outbox` table.
 2. A drainer (on each request and on cron) sends batches with `rememberBulk` (at most 20 items per call), paced to at most 20 memories per minute. The real per-account cap observed is about 24 `remember()` calls per minute.
 3. The drainer stores the `job_id`, then polls with `getRememberStatus`, and stores the `blob_id` once the status is `done`.
-4. **Idempotency:** `idempotency_key = sha256(userId + eventType + merchant + date + amount)`, sent with `dedupe: true`.
+4. **Idempotency:** `idempotency_key = sha256(userId + eventType + merchant + date + amount)` is unique in the outbox, so an event is only queued once. `rememberBulk` takes one key per batch, not per item, and has no `dedupe` option, so each batch's key is derived from its members. A batch with no acknowledgement is resent unchanged with the same key.
 5. **Retries:** on 429 or 503, back off using `retry_after`. Never re-send after a client timeout without checking first, because the write may have landed anyway.
 6. **One drainer at a time:** the write cap is per account, and all users share one operator account. A Postgres lock stops concurrent requests from exceeding it. Each drain call sends one batch and returns, so it can't outrun serverless time limits.
 
 ### 5.4 Recall and rebuild
 - **Normal reads** come from the Postgres cache.
-- **The rebuild** ("Total Recall" button, or a fresh deploy) runs `listNamespaces()`, keeps the namespaces that start with `ky:<userHash>:`, recalls each, decodes the envelopes, and recomputes state. If a namespace returns exactly the recall cap, the rebuild reports an error instead of silently dropping records.
+- **The rebuild** ("Total Recall" button, or a fresh deploy) runs `listNamespaces()`, keeps the namespaces that start with `ky:<userHash>:`, recalls each, decodes the envelopes, and recomputes state. If a namespace returns exactly the recall cap, or fewer records than `listMemories` counts for it, the rebuild reports an error instead of silently dropping records.
 - **Getting the newest record:** use `recall({ sort: "recent" })`. The default ranking is by relevance only and does not guarantee the newest record is returned.
 - **Explanations:** recall by meaning, e.g. "why do you expect Netflix to cost $17.99?". The UI's "Why?" panel shows the cited blob IDs.
 
@@ -223,7 +223,7 @@ USDC coin type on Sui mainnet: `0xdba34672e30cb065b1f93e3ab55318768fd6fef66c1594
 | Incoming family payments | Sui GraphQL | `transactions(filter:{affectedAddress:$a}) { nodes { digest sender{address} effects{ timestamp status balanceChanges{ nodes{ owner{address} amount coinType{repr} } } } } }` |
 | Verify one payment | Sui GraphQL / gRPC | Look up by digest; check status, amount and recipient |
 | FX now | Data API | `GET https://api.tatum.io/v4/data/rate/symbol?symbol=USDC&basePair=NGN` |
-| FX history | Data API | OHLCV endpoint, for the "rate moved X% this week" alert |
+| FX history | Data API | `GET /v4/data/rate/symbol/ohlcv` (needs a `unix` or `time` parameter; other parameters still to be confirmed when this is built), for the "rate moved X% this week" alert |
 | Health | `/status` page | Times every Tatum and Walrus call; shown in the demo |
 
 **Client rules:**
@@ -241,7 +241,7 @@ USDC coin type on Sui mainnet: `0xdba34672e30cb065b1f93e3ab55318768fd6fef66c1594
 - **Namespaces** are derived server-side from the authenticated user. They're never taken from the request.
 - **Disclosure:** in the multi-tenant pattern, the operator account owns users' memories, as the Walrus docs state. Say so in the README and blog. Future work: a user-owned account with Kyvo as a revocable delegate.
 - **The MEMWAL owner key** never touches the server.
-- **Open question:** whether memory content is encrypted on Walrus isn't confirmed yet. The Day 1 probe must answer it **before any real financial facts are written**. If content is public, stop and decide how to handle it.
+- **Memory content:** blobs on public Walrus are SEAL-encrypted. `scripts/probe-memwal.ts` confirmed it on mainnet by downloading its own blob from a public aggregator (354 bytes, test text not readable). The relayer does handle plaintext to embed and to return recall results, so it's trusted with content. The README must say so.
 
 ## 10. Portability (stretch)
 A read-only MCP endpoint `/api/mcp` with per-user tokens (`kyvo_upcoming`, `kyvo_why`). Ask Claude or Codex "what's due this week?" and get answers from the same Walrus memory. It's a stretch goal because operator-owned memory can't safely be shared through the raw Walrus MCP.
@@ -259,7 +259,7 @@ kyvo/
   lib/inbox/              gmail, query builder, extractor (AI SDK + Zod)
   lib/engines/            forecast, decline-guard, trials, registry, hikes, promises, family
   config/providers.ts     provider rules table
-  db/                     drizzle schema: users, tokens, outbox, cache_*, seen_messages, scan_cursors
+  db/                     drizzle schema: users, tokens, outbox, cache_events, seen_messages, scan_cursors, drain_state
   scripts/                seed-demo, probe-tatum, probe-memwal, proof
   tests/                  vitest unit tests + live smoke tests
   docs/                   architecture.md, Progress.md, BLOG.md, DEMO.md

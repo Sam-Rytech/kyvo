@@ -1,0 +1,26 @@
+{
+  "homeCurrency": "NGN",
+  "cards": [
+    { "label": "Grey main", "provider": "Grey" },
+    { "label": "Chipper backup", "provider": "Chipper" }
+  ],
+  "subscriptions": [
+    {
+      "merchant": "Netflix",
+      "card": "Grey main",
+      "charges": [
+        { "date": "2026-09-03", "amount": 15.49 },
+        { "date": "2026-10-03", "amount": 17.99 }
+      ]
+    }
+  ],
+  "promise": { "text": "Cancel Canva", "merchant": "Canva", "date": "2026-10-01" },
+  "trial": {
+    "merchant": "Adobe",
+    "startedOn": "2026-10-25",
+    "endsOn": "2026-11-08",
+    "convertsTo": 22.99,
+    "reason": "Needed it for one client project",
+    "card": "Grey main"
+  }
+}

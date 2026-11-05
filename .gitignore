@@ -1,6 +1,7 @@
 # Secrets: every env file stays local except the blank template
 .env*
 !.env.example
+*.local.json
 
 # Dependencies
 node_modules/
