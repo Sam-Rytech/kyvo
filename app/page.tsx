@@ -1,6 +1,5 @@
 import { eq } from 'drizzle-orm';
 import { DashboardView } from '@/components/dashboard-view';
-import { Landing } from '@/components/landing';
 import { createDb } from '@/db';
 import { cacheEvents, users } from '@/db/schema';
 import { getViewer } from '@/lib/viewer';
@@ -49,8 +48,6 @@ export default async function DashboardPage() {
   const telegramLink = `https://t.me/${bot}?start=${makeLinkCode(viewer.userId, process.env.TOKEN_ENC_KEY as string)}`;
 
   return (
-    <>
-    {viewer.readOnly && <div className="mb-xl"><Landing /></div>}
     <DashboardView
       vault={{ address: user?.vaultAddress ?? null, runway, unavailable: vaultUnavailable }}
       telegram={{ linked: Boolean(user?.telegramChatId), linkUrl: telegramLink }}
@@ -64,8 +61,8 @@ export default async function DashboardPage() {
       rate={rate?.value ?? null}
       rateSource={rate?.source ?? null}
       currency={currency}
+      asOf={asOf}
       hasMemories={events.length > 0}
     />
-    </>
   );
 }

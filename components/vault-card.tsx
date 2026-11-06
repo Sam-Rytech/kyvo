@@ -45,8 +45,8 @@ export function VaultCard({ address, runway, unavailable, rate, currency, readOn
   const local = runway && runway.balance > 0 ? approxLocal(runway.balance, rate, currency) : null;
 
   return (
-    <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm" aria-labelledby="vault-title">
-      <h2 id="vault-title" className="text-sm font-semibold text-primary">
+    <section className="space-y-sm border-t border-secondary pt-lg min-w-0" aria-labelledby="vault-title">
+      <h2 id="vault-title" className="section-title">
         USDC vault
       </h2>
 
@@ -54,14 +54,14 @@ export function VaultCard({ address, runway, unavailable, rate, currency, readOn
 
       {address && runway && (
         <>
-          <p className="text-heading-sm font-mono font-bold text-primary">
-            {usd(runway.balance)} <span className="text-xs font-sans font-normal text-tertiary">USDC on Sui</span>
+          <p className="text-heading-sm font-bold tabular-nums text-primary">
+            {usd(runway.balance)} <span className="text-sm font-normal text-tertiary">USDC on Sui</span>
           </p>
-          {local && <p className="text-xs font-mono text-tertiary">{local}</p>}
+          {local && <p className="text-sm tabular-nums text-tertiary">{local}</p>}
           <button
             onClick={() =>
               openWhy({
-                title: 'Months of runway',
+                title: 'MONTHS OF RUNWAY',
                 summary: 'Your vault balance, read live from Sui through Tatum, divided by what is really still billing each month. Stopped and refunded bills are left out.',
                 rows: [
                   { label: 'Vault balance', value: usd(runway.balance) },
@@ -75,19 +75,16 @@ export function VaultCard({ address, runway, unavailable, rate, currency, readOn
           >
             {runway.months === null ? 'No active bills, so no runway to show' : `${runway.months} months of runway at ${usd(runway.monthlyBurn)} a month`}
           </button>
-          <p className="text-xs text-tertiary">
-            <a href={`https://suiscan.xyz/mainnet/account/${address}`} target="_blank" rel="noreferrer" className="font-mono underline">
-              {address.slice(0, 8)}…{address.slice(-6)}
-            </a>
-            {!readOnly && (
-              <>
-                {' · '}
-                <button onClick={() => setChanging((open) => !open)} className="underline">
-                  Change
-                </button>
-              </>
-            )}
-          </p>
+          {!readOnly && (
+            <p className="flex flex-wrap gap-sm text-sm text-tertiary">
+              <a href={`https://suiscan.xyz/mainnet/account/${address}`} target="_blank" rel="noreferrer" className="font-mono underline">
+                {address.slice(0, 8)}…{address.slice(-6)}
+              </a>
+              <button onClick={() => setChanging((open) => !open)} className="underline">
+                Change
+              </button>
+            </p>
+          )}
         </>
       )}
 

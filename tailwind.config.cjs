@@ -13,13 +13,12 @@ const tokens = require('./design-tokens/tailwind.tokens.cjs')
 
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
-  // Matches the scope tokens.css uses for its dark palette.
-  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
-    // Poppins arrives through the tokens' own fontFamily.sans
-    // (--font-family-sans) — no override here, or the token stops being the
-    // single source for the typeface.
-    extend: tokens.theme.extend,
+    // Colour and font values are overridden in app/globals.css, so the Tatum class names still apply.
+    extend: {
+      ...tokens.theme.extend,
+      fontFamily: { ...tokens.theme.extend.fontFamily, mono: ['var(--font-mono)', 'ui-monospace', 'Cascadia Mono', 'monospace'] },
+    },
   },
   plugins: [],
 }

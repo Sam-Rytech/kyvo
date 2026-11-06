@@ -1,15 +1,15 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { HelpCircle, X } from 'lucide-react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { X } from 'lucide-react';
 
 export type WhyRecord = { sentence: string; blobId: string };
 
 export type WhyContent = {
   title: string;
   summary?: string;
-  /** Each line of the sum, in order. The last can be marked as the total. */
-  rows?: { label: string; value: string; total?: boolean; note?: string }[];
+  /** Each line of the sum, in order. */
+  rows?: { label: string; value: string; total?: boolean; note?: string; small?: boolean; grand?: boolean }[];
   notes?: string[];
   records: WhyRecord[];
 };
@@ -29,77 +29,115 @@ export function useWhy() {
 
 const shortBlob = (id: string) => `${id.slice(0, 8)}…${id.slice(-4)}`;
 
+function Records({ records, open }: { records: WhyRecord[]; open: boolean }) {
+  return (
+    <details open={open}>
+      <summary className="cursor-pointer font-bold">
+        {records.length} {records.length === 1 ? 'record' : 'records'} on Walrus
+      </summary>
+      <ul className="mt-xs space-y-sm">
+        {records.map((record) => (
+          <li key={record.blobId} className="slip-small">
+            <p>{record.sentence}</p>
+            <a href={`https://walruscan.com/mainnet/blob/${record.blobId}`} target="_blank" rel="noreferrer" className="font-bold underline text-primary">
+              {shortBlob(record.blobId)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 export function WhyProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<WhyContent | null>(null);
-  const value = useMemo(() => ({ openWhy: setContent }), []);
+  const opener = useRef<HTMLElement | null>(null);
+  const value = useMemo(
+    () => ({
+      openWhy: (next: WhyContent) => {
+        opener.current = document.activeElement as HTMLElement | null;
+        setContent(next);
+      },
+    }),
+    [],
+  );
+
+  const close = () => {
+    setContent(null);
+    opener.current?.focus();
+  };
 
   useEffect(() => {
     if (!content) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setContent(null);
+      if (event.key === 'Escape') close();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [content]);
+
+  const rows = content?.rows ?? [];
 
   return (
     <WhyContext.Provider value={value}>
       {children}
       {content && (
         <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
-          <button aria-label="Close panel" onClick={() => setContent(null)} className="absolute inset-0 bg-overlay opacity-70" />
-          <aside role="dialog" aria-modal="true" aria-labelledby="why-title" className="relative flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-secondary bg-primary shadow-xl">
-            <header className="flex items-start justify-between gap-lg border-b border-secondary p-xl">
-              <div>
-                <div className="flex items-center gap-xs">
-                  <HelpCircle className="w-5 h-5 text-fg-brand-primary shrink-0" aria-hidden />
-                  <h2 id="why-title" className="text-heading-xs font-bold text-primary">
-                    Why this number?
-                  </h2>
-                </div>
-                <p className="mt-xs text-sm text-tertiary">{content.title}</p>
-              </div>
-              <button onClick={() => setContent(null)} className="p-xs text-tertiary hover:text-primary rounded-lg focus-visible:ring-2 focus-visible:ring-focus-ring" aria-label="Close">
-                <X className="w-4 h-4 text-fg-tertiary shrink-0" />
+          <button aria-label="Close panel" tabIndex={-1} onClick={close} className="absolute inset-0 bg-overlay opacity-70" />
+          <aside role="dialog" aria-modal="true" aria-labelledby="why-title" className="relative flex h-full w-full max-w-md flex-col bg-secondary overflow-y-auto">
+            <div className="flex items-center justify-between gap-md p-lg">
+              <h2 id="why-title" className="section-title">
+                Why this number?
+              </h2>
+              <button onClick={close} autoFocus className="p-xs rounded-lg" aria-label="Close">
+                <X className="w-5 h-5" aria-hidden />
               </button>
-            </header>
+            </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-xl space-y-lg">
+            <div className="px-lg pb-xl space-y-md">
               {content.summary && <p className="text-sm text-secondary">{content.summary}</p>}
 
-              {content.rows && content.rows.length > 0 && (
-                <dl className="p-lg rounded-lg bg-secondary border border-secondary space-y-xs text-sm">
-                  {content.rows.map((row) => (
-                    <div key={row.label} className={row.total ? 'border-t border-secondary pt-xs' : undefined}>
-                      <div className={`flex justify-between gap-md ${row.total ? 'font-bold' : ''}`}>
-                        <dt className={row.total ? 'text-primary' : 'text-secondary'}>{row.label}</dt>
-                        <dd className={`font-mono ${row.total ? 'text-brand-primary' : 'text-primary font-semibold'}`}>{row.value}</dd>
+              <div className="slip">
+                <p className="text-center font-bold tracking-[0.08em]">KYVO</p>
+                <p className="text-center slip-small mb-md">{content.title}</p>
+
+                {rows.map((row) =>
+                  row.grand ? (
+                    <p key={row.label} className="slip-grand">
+                      {row.value}
+                    </p>
+                  ) : (
+                    <div key={row.label}>
+                      {row.total && <hr className="slip-rule" />}
+                      <div className={`flex justify-between gap-md ${row.total ? 'font-bold text-[0.9375rem]' : ''} ${row.small ? 'slip-small' : ''}`}>
+                        <span>{row.label}</span>
+                        <span className="text-right whitespace-nowrap">{row.value}</span>
                       </div>
-                      {row.note && <p className="text-xs text-tertiary mt-xxs">{row.note}</p>}
+                      {row.note && <p className="slip-small mb-xs">{row.note}</p>}
                     </div>
-                  ))}
-                </dl>
-              )}
+                  ),
+                )}
 
-              {content.notes?.map((note) => (
-                <p key={note} className="text-xs text-tertiary">
-                  {note}
-                </p>
-              ))}
-
-              {content.records.length > 0 && (
-                <div className="space-y-xs">
-                  <h3 className="text-xs uppercase tracking-wider text-tertiary font-semibold">Records on Walrus</h3>
-                  {content.records.map((record) => (
-                    <div key={record.blobId} className="p-sm rounded-lg bg-secondary border border-secondary text-xs space-y-xxs">
-                      <p className="text-secondary">{record.sentence}</p>
-                      <a href={`https://walruscan.com/mainnet/blob/${record.blobId}`} target="_blank" rel="noreferrer" className="font-mono text-brand-primary hover:underline">
-                        {shortBlob(record.blobId)}
-                      </a>
+                {content.notes && content.notes.length > 0 && (
+                  <>
+                    <hr className="slip-rule" />
+                    <div className="space-y-xs">
+                      {content.notes.map((note) => (
+                        <p key={note} className="slip-small">
+                          {note}
+                        </p>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </>
+                )}
+
+                {content.records.length > 0 && (
+                  <>
+                    <hr className="slip-rule" />
+                    <Records records={content.records} open={rows.length === 0} />
+                  </>
+                )}
+              </div>
             </div>
           </aside>
         </div>

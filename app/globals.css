@@ -6,8 +6,184 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Kyvo's look: the same token names, with Due Date's values. See docs/superpowers/specs/2026-11-06-frontend-redesign-design.md */
+:root {
+  --marigold: #ffc21a;
+  --aubergine: #24103a;
+  --warm-white: #fffdf7;
+  --covered: #39c47a;
+  --at-risk: #d42a20;
+  --ignored: #dcd8e0;
+
+  --color-text-primary: var(--aubergine);
+  --color-text-secondary: #46385a;
+  --color-text-tertiary: #65576f;
+  --color-text-quaternary: #65576f;
+  --color-text-placeholder: #65576f;
+  --color-text-primary-on-brand: var(--warm-white);
+  --color-text-brand-primary: #5b2a86;
+  --color-fg-primary: var(--aubergine);
+  --color-fg-secondary: #46385a;
+  --color-fg-tertiary: #65576f;
+  --color-fg-quaternary: #65576f;
+  --color-fg-brand-primary: var(--aubergine);
+  --color-bg-primary: var(--warm-white);
+  --color-bg-primary-hover: #f8f3e6;
+  --color-bg-secondary: #f8f3e6;
+  --color-bg-secondary-hover: #f1eada;
+  --color-bg-tertiary: #f1eada;
+  --color-bg-overlay: var(--aubergine);
+  --color-bg-brand-solid: var(--aubergine);
+  --color-bg-brand-solid-hover: #3a1c58;
+  --color-border-primary: #cfc4ad;
+  --color-border-secondary: #e6dfcf;
+  --color-border-brand: var(--aubergine);
+  --color-ring-focus-ring: #5b2a86;
+  --font-family-sans: var(--font-body), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --gutter: 16px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+html {
+  color-scheme: light;
+}
+
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-family-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring-focus-ring);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-display), Impact, 'Arial Narrow', sans-serif;
+    font-weight: 900;
+    font-stretch: 62%;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.9;
+  }
+
+  .page-title {
+    font-family: var(--font-display), Impact, 'Arial Narrow', sans-serif;
+    font-weight: 900;
+    font-stretch: 62%;
+    text-transform: uppercase;
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+    line-height: 0.92;
+    color: var(--aubergine);
+    text-wrap: balance;
+  }
+
+  .section-title {
+    font-family: var(--font-display), system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--aubergine);
+  }
+
+  .app-main {
+    padding: var(--gutter) var(--gutter) 40px;
+  }
+
+  .app-main > * {
+    max-width: 72rem;
+  }
+
+  /* The full-width status band at the top of Today */
+  .app-main > .band-wrap {
+    max-width: none;
+  }
+
+  .band {
+    margin: calc(-1 * var(--gutter)) calc(-1 * var(--gutter)) 0;
+    padding: 24px var(--gutter) 36px;
+    background: var(--band-bg);
+    color: var(--band-fg);
+    display: grid;
+    gap: 16px;
+  }
+
+  .band[data-status='soon'] {
+    --band-bg: var(--marigold);
+    --band-fg: var(--aubergine);
+    --band-btn-bg: var(--aubergine);
+    --band-btn-fg: var(--warm-white);
+  }
+
+  .band[data-status='covered'] {
+    --band-bg: var(--covered);
+    --band-fg: var(--aubergine);
+    --band-btn-bg: var(--aubergine);
+    --band-btn-fg: var(--warm-white);
+  }
+
+  .band[data-status='risk'] {
+    --band-bg: var(--at-risk);
+    --band-fg: #ffffff;
+    --band-btn-bg: #ffffff;
+    --band-btn-fg: #8a1610;
+  }
+
+  .band[data-status='ignored'] {
+    --band-bg: var(--ignored);
+    --band-fg: var(--aubergine);
+    --band-btn-bg: var(--aubergine);
+    --band-btn-fg: var(--warm-white);
+  }
+
+  .band-sentence {
+    font-size: clamp(3rem, 10.5vw, 8.5rem);
+    max-width: 16ch;
+    overflow-wrap: anywhere;
+  }
+
+  .band :focus-visible {
+    outline-color: currentColor;
+  }
+
+  /* A POS slip, used only for amounts and their records */
+  .slip {
+    --tooth: 7px;
+    background: #ffffff;
+    color: var(--aubergine);
+    font-family: var(--font-mono), ui-monospace, 'Cascadia Mono', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 24px 20px 30px;
+    -webkit-mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--tooth)) 51% repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--tooth)) 51% repeat-x;
+    mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--tooth)) 51% repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--tooth)) 51% repeat-x;
+  }
+
+  .slip-rule {
+    border: 0;
+    border-top: 1px dashed #8d8299;
+    margin: 12px 0;
+  }
+
+  .slip-small {
+    color: #5c4f68;
+    font-size: 0.75rem;
+  }
+
+  .slip-grand {
+    font-weight: 700;
+    font-size: 1.375rem;
+    text-align: right;
+  }
 }

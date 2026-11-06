@@ -1,7 +1,7 @@
 export function TelegramCard({ linked, linkUrl }: { linked: boolean; linkUrl: string }) {
   return (
-    <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-xs" aria-labelledby="telegram-title">
-      <h2 id="telegram-title" className="text-sm font-semibold text-primary">
+    <section className="space-y-xs border-t border-secondary pt-lg min-w-0" aria-labelledby="telegram-title">
+      <h2 id="telegram-title" className="section-title">
         Telegram alerts
       </h2>
       {linked ? (
