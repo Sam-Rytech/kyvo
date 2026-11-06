@@ -187,3 +187,7 @@ body {
     text-align: right;
   }
 }
+
+.band-wrap > :not(.band) {
+  max-width: 72rem;
+}

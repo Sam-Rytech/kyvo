@@ -17,7 +17,7 @@ function Picker({ onAddress, saving }: { onAddress: (address: string) => void; s
     <div className="flex flex-wrap items-center gap-xs">
       <ConnectButton instance={dAppKit} />
       {account && (
-        <button onClick={() => onAddress(account.address)} disabled={saving} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+        <button onClick={() => onAddress(account.address)} disabled={saving} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
           Use {account.address.slice(0, 6)}…{account.address.slice(-4)} as my vault
         </button>
       )}

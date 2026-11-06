@@ -9,7 +9,7 @@ export function TelegramCard({ linked, linkUrl }: { linked: boolean; linkUrl: st
       ) : (
         <>
           <p className="text-sm text-secondary">Get warned 48 hours before a charge your card can&apos;t cover.</p>
-          <a href={linkUrl} target="_blank" rel="noreferrer" className="inline-block rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand">
+          <a href={linkUrl} target="_blank" rel="noreferrer" className="inline-block rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand">
             Connect Telegram
           </a>
         </>

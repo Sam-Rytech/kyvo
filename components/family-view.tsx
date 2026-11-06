@@ -30,7 +30,7 @@ function MemberRow({ member, readOnly }: { member: MemberState; readOnly: boolea
           <span className="text-sm font-semibold text-primary">{member.name}</span>
           <span className={`rounded-full border px-md py-xxs text-xs font-medium ${BADGES[member.status]}`}>{statusLabel(member)}</span>
         </div>
-        <span className="text-sm font-mono font-bold text-primary">{usd(member.status === 'paid' ? member.share : member.owed)}</span>
+        <span className="text-md font-bold tabular-nums text-primary">{usd(member.status === 'paid' ? member.share : member.owed)}</span>
       </div>
       <p className="text-xs text-tertiary">
         {member.lastLateDays === null
@@ -38,7 +38,7 @@ function MemberRow({ member, readOnly }: { member: MemberState; readOnly: boolea
           : `Paid ${member.paidCount} ${member.paidCount === 1 ? 'time' : 'times'}, ${member.lateCount === 0 ? 'always on time' : `late ${member.lateCount} ${member.lateCount === 1 ? 'time' : 'times'}`}${member.lastLateDays ? `, ${member.lastLateDays} ${member.lastLateDays === 1 ? 'day' : 'days'} late last time` : ''}`}
         {member.digest && (
           <>
-            {' · '}
+            {'. '}
             <a href={`https://suiscan.xyz/mainnet/tx/${member.digest}`} target="_blank" rel="noreferrer" className="underline">
               Last payment on Sui
             </a>
@@ -128,7 +128,7 @@ function NewPlan({ onCreated }: { onCreated: () => void }) {
         <button type="button" onClick={() => setMembers((list) => [...list, { ...EMPTY_MEMBER }])} className="rounded-lg border border-secondary bg-primary px-md py-xs text-sm font-semibold text-secondary">
           Add a member
         </button>
-        <button disabled={saving || !merchant.trim() || !firstDue} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+        <button disabled={saving || !merchant.trim() || !firstDue} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
           {saving ? 'Saving…' : 'Create plan'}
         </button>
       </div>
@@ -163,18 +163,18 @@ export function FamilyView({ plans, vault, readOnly }: { plans: PlanState[]; vau
   }
 
   return (
-    <div className="space-y-lg">
+    <div className="space-y-2xl">
       {!readOnly && <MemorySyncStatus />}
-      <div>
-        <h1 className="text-heading-xs font-semibold text-primary">Family plans</h1>
-        <p className="text-xs text-tertiary">Members pay your vault in USDC on Sui. Kyvo confirms each payment on-chain through Tatum, and remembers who pays late.</p>
+      <div className="space-y-xs">
+        <h1 className="page-title">Family plans</h1>
+        <p className="text-md text-secondary max-w-prose">Members pay your vault in USDC on Sui. Kyvo confirms each payment on-chain through Tatum, and remembers who pays late.</p>
       </div>
 
       {!readOnly && !vault && <p className="rounded-lg border border-utility-warning-200 bg-utility-warning-50 p-md text-sm text-utility-warning-700">Add your vault address on the dashboard first, so Kyvo knows where members&apos; payments arrive.</p>}
 
       {!readOnly && plans.length > 0 && (
         <div className="flex flex-wrap items-center gap-sm">
-          <button onClick={() => void check()} disabled={checking || !vault} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+          <button onClick={() => void check()} disabled={checking || !vault} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
             {checking ? 'Checking Sui…' : 'Check for payments'}
           </button>
           {result && (
@@ -200,8 +200,8 @@ export function FamilyView({ plans, vault, readOnly }: { plans: PlanState[]; vau
       ))}
 
       {plans.map((plan) => (
-        <section key={plan.id} className="rounded-xl border border-secondary bg-primary p-xl shadow-xs" aria-label={plan.merchant}>
-          <h2 className="text-heading-xs font-bold text-primary">{plan.merchant}</h2>
+        <section key={plan.id} className="border-t border-secondary pt-lg" aria-label={plan.merchant}>
+          <h2 className="section-title">{plan.merchant}</h2>
           <p className="text-xs text-tertiary">Due monthly, from {shortDate(plan.firstDue)}</p>
           <ul className="divide-y divide-secondary mt-xs">
             {plan.members.map((member) => (
@@ -211,8 +211,8 @@ export function FamilyView({ plans, vault, readOnly }: { plans: PlanState[]; vau
         </section>
       ))}
 
-      {!readOnly && <section className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm" aria-labelledby="new-plan">
-        <h2 id="new-plan" className="text-sm font-semibold text-primary">
+      {!readOnly && <section className="border-t border-secondary pt-lg space-y-sm" aria-labelledby="new-plan">
+        <h2 id="new-plan" className="section-title">
           {plans.length ? 'Add another plan' : 'Create your first plan'}
         </h2>
         <NewPlan onCreated={() => void sync()} />

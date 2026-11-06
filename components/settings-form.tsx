@@ -30,7 +30,7 @@ export function SettingsForm({ currency, providers }: { currency: string; provid
         event.preventDefault();
         void save();
       }}
-      className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-lg"
+      className="border-t border-secondary pt-lg space-y-lg"
     >
       <label className="block space-y-xs">
         <span className="text-sm font-semibold text-primary">Home currency</span>
@@ -62,7 +62,7 @@ export function SettingsForm({ currency, providers }: { currency: string; provid
       </fieldset>
 
       <div className="flex items-center gap-sm">
-        <button disabled={all.length === 0 || status === 'saving'} className="rounded-lg bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+        <button disabled={all.length === 0 || status === 'saving'} className="rounded-full bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand disabled:opacity-50">
           {status === 'saving' ? 'Saving…' : 'Save'}
         </button>
         <p role="status" className="text-xs text-secondary">

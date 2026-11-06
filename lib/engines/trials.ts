@@ -42,7 +42,7 @@ export function trialStates(events: CachedEvent[], asOf: string): TrialState[] {
 
     return {
       slug,
-      name: newest((e) => str(e.event.name)) ?? slug,
+      name: newest((e) => str(e.event.name)) ?? slug.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
       startedOn: list[0].eventDate,
       endsAt,
       daysLeft,

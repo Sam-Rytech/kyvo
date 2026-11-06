@@ -81,7 +81,7 @@ export function ScanPanel({ autoStart = false, label = 'Scan now' }: { autoStart
   }, []);
 
   return (
-    <div className="rounded-xl border border-secondary bg-primary p-lg shadow-xs space-y-sm">
+    <div className="border-y border-secondary py-md space-y-sm">
       <div className="flex flex-wrap items-center justify-between gap-sm">
         <div className="min-w-0" role="status">
           {state === 'idle' && <p className="text-sm text-secondary">Read your billing emails and save what Kyvo learns to Walrus Memory.</p>}
@@ -100,7 +100,7 @@ export function ScanPanel({ autoStart = false, label = 'Scan now' }: { autoStart
         {state !== 'running' && (
           <button
             onClick={() => void run()}
-            className="inline-flex items-center gap-xs rounded-lg bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand shadow-xs hover:bg-brand-solid-hover focus-visible:ring-2 focus-visible:ring-focus-ring"
+            className="inline-flex items-center gap-xs rounded-full bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand shadow-xs hover:bg-brand-solid-hover focus-visible:ring-2 focus-visible:ring-focus-ring"
           >
             {label}
           </button>

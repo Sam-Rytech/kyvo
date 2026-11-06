@@ -13,9 +13,9 @@ export default async function SettingsPage() {
   const [user] = await createDb().select().from(users).where(eq(users.id, session.userId));
 
   return (
-    <div className="max-w-xl mx-auto space-y-lg">
+    <div className="max-w-xl space-y-lg">
       <div>
-        <h1 className="text-heading-xs font-semibold text-primary">Settings</h1>
+        <h1 className="page-title">Settings</h1>
         <p className="text-xs text-tertiary">Signed in as {session.email}</p>
       </div>
       <SettingsForm currency={user?.homeCurrency ?? 'NGN'} providers={user?.providers ?? []} />

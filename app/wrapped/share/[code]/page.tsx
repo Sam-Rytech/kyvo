@@ -10,7 +10,7 @@ export default async function SharedWrappedPage({ params }: { params: Promise<{ 
   if (!report) notFound();
 
   return (
-    <div className="space-y-lg max-w-2xl mx-auto">
+    <div className="space-y-lg max-w-3xl">
       <WrappedCard report={report} showMerchants={false} />
       <p className="text-center text-sm text-secondary">
         <Link href="/" className="font-semibold text-brand-primary hover:underline">

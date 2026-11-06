@@ -26,9 +26,9 @@ function TrialCard({ trial, onSaved, readOnly }: { trial: TrialState; onSaved: (
 
   const soon = trial.status === 'active' && (trial.daysLeft as number) <= 3;
   return (
-    <li className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-xs">
+    <li className="border-t border-secondary py-md space-y-xs">
       <div className="flex flex-wrap items-center justify-between gap-xs">
-        <h3 className="text-sm font-bold text-primary">{trial.name}</h3>
+        <h3 className="text-lg font-semibold text-primary">{trial.name}</h3>
         {trial.status === 'active' && <span className={`rounded-full border px-md py-xxs text-xs font-semibold ${soon ? 'bg-utility-error-50 text-utility-error-700 border-utility-error-200' : 'bg-utility-warning-50 text-utility-warning-700 border-utility-warning-200'}`}>{trial.daysLeft === 1 ? '1 day left' : `${trial.daysLeft} days left`}</span>}
         {trial.status === 'ended' && <span className="rounded-full border border-utility-gray-200 bg-utility-gray-50 px-md py-xxs text-xs font-medium text-utility-gray-700">{trial.converted ? 'Became a paid plan' : 'Ended'}</span>}
         {trial.status === 'unknown' && <span className="rounded-full border border-utility-warning-200 bg-utility-warning-50 px-md py-xxs text-xs font-medium text-utility-warning-700">End date needed</span>}
@@ -45,7 +45,7 @@ function TrialCard({ trial, onSaved, readOnly }: { trial: TrialState; onSaved: (
             When does it end?
             <input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="block mt-xxs rounded-lg border border-secondary bg-primary px-sm py-xs text-sm text-primary" />
           </label>
-          <button onClick={() => void confirm()} disabled={!date || status === 'saving'} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+          <button onClick={() => void confirm()} disabled={!date || status === 'saving'} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
             Save
           </button>
         </div>
@@ -80,16 +80,16 @@ export function TrialsView({ trials, promises, readOnly }: { trials: TrialState[
   }
 
   return (
-    <div className="space-y-xl">
+    <div className="space-y-2xl">
       {!readOnly && <MemorySyncStatus />}
-      <div>
-        <h1 className="text-heading-xs font-semibold text-primary">Trials and promises</h1>
-        <p className="text-xs text-tertiary">Found in your billing emails, or things you told Kyvo.</p>
+      <div className="space-y-xs">
+        <h1 className="page-title">Trials and promises</h1>
+        <p className="text-md text-secondary">Found in your billing emails, or things you told Kyvo.</p>
       </div>
       {open > 0 && <p className="text-xs text-tertiary">Saving to Walrus Memory…</p>}
 
-      <section aria-labelledby="promises-heading" className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-sm">
-        <h2 id="promises-heading" className="text-sm font-semibold text-primary">
+      <section aria-labelledby="promises-heading" className="space-y-sm">
+        <h2 id="promises-heading" className="section-title">
           You said you would
         </h2>
         {promises.length === 0 && <p className="text-sm text-tertiary">Nothing yet. Tell Kyvo what you plan to cancel, and it&apos;ll keep reminding you.</p>}
@@ -98,7 +98,7 @@ export function TrialsView({ trials, promises, readOnly }: { trials: TrialState[
             <li key={promise.id} className="flex items-start justify-between gap-sm text-sm">
               <span className={promise.status === 'done' ? 'text-tertiary line-through' : 'text-primary'}>
                 {promise.text}
-                {promise.status === 'open' && <span className="block text-xs text-tertiary">{promise.ageDays === 0 ? 'Today' : `${promise.ageDays} days ago`}</span>}
+                {promise.status === 'open' && <span className="block text-xs text-tertiary">{promise.ageDays === 0 ? 'Today' : promise.ageDays === 1 ? 'Yesterday' : `${promise.ageDays} days ago`}</span>}
               </span>
               {!readOnly &&
                 promise.status === 'open' &&
@@ -128,7 +128,7 @@ export function TrialsView({ trials, promises, readOnly }: { trials: TrialState[
             What do you plan to do?
           </label>
           <input id="promise-text" value={text} onChange={(event) => setText(event.target.value)} maxLength={200} placeholder="Cancel Canva before it renews" className="flex-1 min-w-0 rounded-lg border border-secondary bg-primary px-md py-xs text-sm text-primary placeholder:text-placeholder" />
-          <button disabled={text.trim().length < 3} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50 shrink-0">
+          <button disabled={text.trim().length < 3} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50 shrink-0">
             Add
           </button>
         </form>}
@@ -136,13 +136,13 @@ export function TrialsView({ trials, promises, readOnly }: { trials: TrialState[
       </section>
 
       <section aria-labelledby="trials-heading" className="space-y-sm">
-        <h2 id="trials-heading" className="text-sm font-semibold text-primary">
+        <h2 id="trials-heading" className="section-title">
           Trials
         </h2>
         {trials.length === 0 ? (
           <p className="text-sm text-tertiary">No trials found in your emails.</p>
         ) : (
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-md">
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-2xl">
             {trials.map((trial) => (
               <TrialCard key={trial.slug} trial={trial} onSaved={() => void sync()} readOnly={readOnly} />
             ))}

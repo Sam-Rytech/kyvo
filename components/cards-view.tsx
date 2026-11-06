@@ -14,17 +14,19 @@ async function saveCard(body: unknown) {
 
 function ProviderFacts({ provider }: { provider: string }) {
   const rule = getProviderRule(provider);
-  if (!rule) return <p className="text-xs text-tertiary">Kyvo doesn&apos;t have rules for {provider} yet, so it doesn&apos;t state any fees.</p>;
+  if (!rule) return null;
   const facts = [
     rule.declineFee ? `Decline fee: ${rule.declineFee.currency === 'USD' ? usd(rule.declineFee.amount) : `${rule.declineFee.currency} ${rule.declineFee.amount}`}.` : null,
     rule.txnFee ? `Per payment: ${usd(rule.txnFee.flatUsd ?? 0)}.` : null,
     rule.termination?.note ?? null,
   ].filter(Boolean);
+  const measured = rule.fundingMarkup ? `Local amounts run about ${(rule.fundingMarkup * 100).toFixed(2)}% above the market rate, measured from a real payment.` : null;
+  if (!facts.length && !measured) return null;
   return (
-    <div className="text-xs text-tertiary space-y-xxs">
-      <p>{facts.length ? facts.join(' ') : `${provider}'s fees and decline rules couldn't be confirmed, so Kyvo doesn't state any.`}</p>
-      {rule.note && <p>{rule.note}</p>}
-      {rule.sources.length > 0 && (
+    <div className="text-sm text-tertiary space-y-xxs">
+      {facts.length > 0 && <p>{facts.join(' ')}</p>}
+      {measured && <p>{measured}</p>}
+      {facts.length > 0 && rule.sources.length > 0 && (
         <p>
           Checked {shortDate(RULES_CHECKED)}:{' '}
           {rule.sources.map((source, i) => (
@@ -60,15 +62,15 @@ function CardRow({ card, onSaved, readOnly }: { card: CardState; onSaved: () => 
   const validBalance = balance === '' || (Number.isFinite(Number(balance)) && Number(balance) >= 0);
 
   return (
-    <li className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-md">
+    <li className="border-t border-secondary py-lg space-y-md">
       <div className="flex flex-wrap items-start justify-between gap-sm">
         <div>
-          <h2 className="text-heading-xs font-bold text-primary">{/^\d{4}$/.test(card.card) ? `Card ending ${card.card}` : card.card}</h2>
+          <h3 className="text-lg font-semibold text-primary">{/^\d{4}$/.test(card.card) ? `Card ending ${card.card}` : card.card}</h3>
           <p className="text-xs text-tertiary">{card.provider ?? 'Provider not set'}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs uppercase tracking-wider text-tertiary">Balance</p>
-          <p className="text-heading-xs font-mono font-bold text-primary">{card.balance === null ? 'Unknown' : usd(card.balance)}</p>
+          <p className="text-sm text-tertiary">Balance</p>
+          <p className="text-lg font-bold tabular-nums text-primary">{card.balance === null ? 'Unknown' : usd(card.balance)}</p>
         </div>
       </div>
 
@@ -80,7 +82,7 @@ function CardRow({ card, onSaved, readOnly }: { card: CardState; onSaved: () => 
           {card.holders.map((holder) => (
             <li key={holder.slug}>
               <button
-                onClick={() => openWhy({ title: `${holder.name} holds this card`, summary: `Last seen ${shortDate(holder.lastSeen)}.`, records: holder.blobIds.map((blobId) => ({ blobId, sentence: `${holder.name} used this card.` })) })}
+                onClick={() => openWhy({ title: `${holder.name} holds this card`.toUpperCase(), summary: `Last seen ${shortDate(holder.lastSeen)}.`, records: holder.blobIds.map((blobId) => ({ blobId, sentence: `${holder.name} used this card.` })) })}
                 className={`rounded-md border px-sm py-xxs text-xs ${holder.stale ? 'border-utility-warning-200 bg-utility-warning-50 text-utility-warning-700' : 'border-secondary bg-secondary text-secondary'}`}
               >
                 {holder.name}
@@ -104,10 +106,10 @@ function CardRow({ card, onSaved, readOnly }: { card: CardState; onSaved: () => 
           </datalist>
         </label>
         <label className="text-xs font-medium text-secondary">
-          Balance now, in dollars
+          Balance now, in dollars (typed by you, as card providers have no API)
           <input inputMode="decimal" value={balance} onChange={(event) => setBalance(event.target.value)} placeholder="0.00" className="block mt-xxs w-28 rounded-lg border border-secondary bg-primary px-sm py-xs text-sm text-primary placeholder:text-placeholder" />
         </label>
-        <button onClick={() => void save()} disabled={!changed || !validBalance || status === 'saving'} className="rounded-lg bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
+        <button onClick={() => void save()} disabled={!changed || !validBalance || status === 'saving'} className="rounded-full bg-brand-solid px-md py-xs text-sm font-semibold text-primary-on-brand disabled:opacity-50">
           Save
         </button>
         {status === 'saved' && <span className="text-xs text-secondary">Saved. Updating from Walrus Memory…</span>}
@@ -122,13 +124,13 @@ export function CardsView({ cards, readOnly }: { cards: CardState[]; readOnly: b
   const total = cards.reduce((sum, card) => sum + card.holders.length, 0);
 
   return (
-    <div className="space-y-lg">
+    <section id="cards" className="space-y-sm scroll-mt-20" aria-labelledby="cards-title">
       {!readOnly && <MemorySyncStatus />}
       <div>
-        <h1 className="text-heading-xs font-semibold text-primary">Cards</h1>
-        <p className="text-xs text-tertiary">
-          {cards.length === 0 ? 'No cards found in your emails yet.' : `${total} ${total === 1 ? 'service holds' : 'services hold'} your cards. Card providers have no API, so the provider and balance are entered by hand.`}
-        </p>
+        <h2 id="cards-title" className="page-title">
+          Cards
+        </h2>
+        <p className="text-md text-secondary mt-xs">{cards.length === 0 ? 'No cards found in your emails yet.' : `${total} ${total === 1 ? 'service holds' : 'services hold'} your cards.`}</p>
       </div>
       {open > 0 && <p className="text-xs text-tertiary">Saving to Walrus Memory…</p>}
       <ul className="space-y-md">
@@ -136,6 +138,6 @@ export function CardsView({ cards, readOnly }: { cards: CardState[]; readOnly: b
           <CardRow key={card.card} card={card} onSaved={() => void sync()} readOnly={readOnly} />
         ))}
       </ul>
-    </div>
+    </section>
   );
 }

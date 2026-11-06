@@ -1,13 +1,6 @@
-import { eq } from 'drizzle-orm';
-import { CardsView } from '@/components/cards-view';
-import { createDb } from '@/db';
-import { cacheEvents } from '@/db/schema';
-import { getViewer } from '@/lib/viewer';
-import { today } from '@/lib/engines/dates';
-import { cardStates } from '@/lib/engines/registry';
+import { redirect } from 'next/navigation';
 
-export default async function CardsPage() {
-  const viewer = await getViewer();
-  const events = await createDb().select().from(cacheEvents).where(eq(cacheEvents.userId, viewer.userId));
-  return <CardsView cards={cardStates(events, today())} readOnly={viewer.readOnly} />;
+/** Cards now lives on the Subscriptions page. */
+export default function CardsPage() {
+  redirect('/subscriptions#cards');
 }

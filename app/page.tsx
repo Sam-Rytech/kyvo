@@ -49,7 +49,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardView
-      vault={{ address: user?.vaultAddress ?? null, runway, unavailable: vaultUnavailable }}
+      // A signed-out visitor gets the balance, and the address never reaches their browser.
+      vault={{ address: viewer.readOnly && user?.vaultAddress ? 'hidden' : (user?.vaultAddress ?? null), runway, unavailable: vaultUnavailable }}
       telegram={{ linked: Boolean(user?.telegramChatId), linkUrl: telegramLink }}
       readOnly={viewer.readOnly}
       funding={buildFunding(events, currency, asOf)}

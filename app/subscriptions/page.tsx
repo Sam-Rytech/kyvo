@@ -1,79 +1,17 @@
 import { eq } from 'drizzle-orm';
-import { AlertTriangle } from 'lucide-react';
+import { CardsView } from '@/components/cards-view';
 import { ScanPanel } from '@/components/scan-panel';
+import { SubscriptionsList } from '@/components/subscriptions-view';
 import { createDb } from '@/db';
 import { cacheEvents, users } from '@/db/schema';
 import { getViewer } from '@/lib/viewer';
 import { getTatum } from '@/lib/chain/tatum-client';
-import { deriveSubscriptions, type SubscriptionView } from '@/lib/engines/subscriptions';
-import { approxLocal, shortDate } from '@/lib/format';
+import { today } from '@/lib/engines/dates';
+import { cardStates } from '@/lib/engines/registry';
+import { deriveSubscriptions } from '@/lib/engines/subscriptions';
 import { getUsdcRate, type Rate } from '@/lib/fx/tatum-rates';
 
-const shortBlob = (id: string) => `${id.slice(0, 8)}…${id.slice(-4)}`;
-
-function money(amount: number | null, currency: string | null) {
-  if (amount === null) return '—';
-  return currency && currency !== 'USD' ? `${currency} ${amount.toFixed(2)}` : `$${amount.toFixed(2)}`;
-}
-
-// Whole class names, because Tailwind can't see classes assembled at runtime.
-const BADGE_TONES = {
-  warning: 'border-utility-warning-200 bg-utility-warning-50 text-utility-warning-700',
-  error: 'border-utility-error-200 bg-utility-error-50 text-utility-error-700',
-  gray: 'border-utility-gray-200 bg-utility-gray-50 text-utility-gray-700',
-};
-
-function Badge({ tone, children }: { tone: keyof typeof BADGE_TONES; children: React.ReactNode }) {
-  return <span className={`inline-flex items-center rounded-full border px-md py-xxs text-xs font-medium ${BADGE_TONES[tone]}`}>{children}</span>;
-}
-
-function SubscriptionRow({ sub, rate }: { sub: SubscriptionView; rate: Rate | null }) {
-  const local = rate && sub.lastAmount !== null && (sub.currency ?? 'USD') === 'USD' ? sub.lastAmount * rate.value : null;
-  return (
-    <div className="p-xl">
-      <div className="flex items-start justify-between gap-md">
-        <div className="min-w-0 space-y-xs">
-          <div className="flex flex-wrap items-center gap-xs">
-            <span className="font-bold text-md text-primary">{sub.name}</span>
-            {sub.usageBilled && <Badge tone="gray">Usage-billed</Badge>}
-            {sub.priceChange && (
-              <Badge tone="warning">
-                ${sub.priceChange.from.toFixed(2)} → ${sub.priceChange.to.toFixed(2)}
-              </Badge>
-            )}
-            {sub.taxRise && <Badge tone="gray">Now includes tax: ${sub.taxRise.to.toFixed(2)}</Badge>}
-            {sub.declineCount > 0 && <Badge tone="error">{sub.declineCount === 1 ? '1 decline' : `${sub.declineCount} declines`}</Badge>}
-            {sub.refundCount > 0 && <Badge tone="gray">{sub.refundCount === 1 ? '1 refund' : `${sub.refundCount} refunds`}</Badge>}
-          </div>
-          <p className="text-xs text-tertiary">
-            {sub.lastDate ? `Last charged ${shortDate(sub.lastDate)}` : 'No successful charge yet'}
-            {sub.card ? ` • card ${sub.card}` : ''}
-          </p>
-        </div>
-        <div className="text-right shrink-0">
-          <div className="text-heading-xs font-mono font-bold text-primary">{money(sub.lastAmount, sub.currency)}</div>
-          {local !== null && <div className="text-xs font-mono text-tertiary">{approxLocal(local, 1, rate?.base ?? '')}</div>}
-        </div>
-      </div>
-
-      <details className="mt-sm">
-        <summary className="text-xs font-medium text-brand-primary cursor-pointer">
-          {sub.records.length === 1 ? '1 record' : `${sub.records.length} records`} on Walrus
-        </summary>
-        <ul className="mt-xs space-y-xs">
-          {sub.records.map((record) => (
-            <li key={record.blobId} className="rounded-lg border border-secondary bg-secondary p-xs text-xs">
-              <p className="text-secondary">{record.sentence}</p>
-              <a href={`https://walruscan.com/mainnet/blob/${record.blobId}`} target="_blank" rel="noreferrer" className="font-mono text-brand-primary hover:underline">
-                {shortBlob(record.blobId)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </details>
-    </div>
-  );
-}
+export const metadata = { title: 'Subscriptions · Kyvo' };
 
 export default async function SubscriptionsPage() {
   const viewer = await getViewer();
@@ -97,33 +35,18 @@ export default async function SubscriptionsPage() {
   }
 
   return (
-    <div className="space-y-lg">
-      <div>
-        <h1 className="text-heading-xs font-semibold text-primary">Subscriptions</h1>
-        <p className="text-xs text-tertiary">Learned from your billing emails. Every record is stored on Walrus Memory.</p>
-      </div>
+    <div className="space-y-2xl">
+      <section className="space-y-lg">
+        <h1 className="page-title">Subscriptions</h1>
 
-      {!viewer.readOnly && <ScanPanel />}
+        {!viewer.readOnly && <ScanPanel />}
 
-      {rateFailed && (
-        <p className="flex items-center gap-xs text-xs text-utility-warning-700">
-          <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden />
-          Exchange rates are temporarily unavailable, so local amounts are hidden.
-        </p>
-      )}
+        {rateFailed && <p className="text-sm text-utility-warning-700">Exchange rates are unavailable right now, so local amounts are hidden.</p>}
 
-      {subscriptions.length === 0 ? (
-        <div className="rounded-xl border border-secondary bg-primary p-2xl text-center shadow-xs">
-          <h2 className="text-heading-xs font-semibold text-primary">Nothing here yet</h2>
-          <p className="text-sm text-secondary mt-xs">Your dollar subscriptions show up here on their own after a scan.</p>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-secondary bg-primary shadow-xs divide-y divide-secondary">
-          {subscriptions.map((sub) => (
-            <SubscriptionRow key={sub.slug} sub={sub} rate={rate} />
-          ))}
-        </div>
-      )}
+        {subscriptions.length === 0 ? <p className="text-md text-secondary border-t border-secondary pt-md">Your dollar subscriptions show up here on their own after a scan.</p> : <SubscriptionsList subscriptions={subscriptions} rate={rate?.value ?? null} currency={home} />}
+      </section>
+
+      <CardsView cards={cardStates(events, today())} readOnly={viewer.readOnly} />
     </div>
   );
 }

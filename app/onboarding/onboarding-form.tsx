@@ -39,7 +39,7 @@ export function OnboardingForm({ initialCurrency, initialProviders }: { initialC
   }
 
   return (
-    <div className="rounded-xl border border-secondary bg-primary p-xl shadow-xs space-y-xl">
+    <div className="border-t border-secondary pt-lg space-y-xl">
       <label className="block space-y-xs">
         <span className="text-sm font-semibold text-primary">What currency do you fund your cards from?</span>
         <select
@@ -72,7 +72,7 @@ export function OnboardingForm({ initialCurrency, initialProviders }: { initialC
         <button
           onClick={() => void start()}
           disabled={saving || providers.length === 0}
-          className="w-full rounded-lg bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand shadow-xs hover:bg-brand-solid-hover disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="w-full rounded-full bg-brand-solid px-lg py-sm text-sm font-semibold text-primary-on-brand hover:bg-brand-solid-hover disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
           {saving ? 'Saving…' : 'Scan my billing emails'}
         </button>

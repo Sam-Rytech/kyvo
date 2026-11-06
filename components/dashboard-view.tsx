@@ -222,7 +222,7 @@ export function DashboardView({ funding, blank, hindcast, alerts, trials, promis
                 {openPromises.slice(0, 3).map((promise) => (
                   <li key={promise.id} className="text-md text-primary">
                     {promise.text}
-                    {promise.resurface && <span className="text-sm text-tertiary"> ({promise.ageDays} days ago)</span>}
+                    {promise.resurface && <span className="text-sm text-tertiary"> ({promise.ageDays === 1 ? '1 day' : `${promise.ageDays} days`} ago)</span>}
                   </li>
                 ))}
               </ul>
